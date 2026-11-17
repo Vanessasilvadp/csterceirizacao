@@ -511,6 +511,9 @@
   .barra-filtros select,.barra-filtros input{padding:7px 10px;border:1px solid var(--borda);border-radius:8px;background:var(--branco);color:var(--preto);outline:none;font-size:13px}
   .barra-filtros input{min-width:220px;flex:1;max-width:300px}
   .barra-filtros select:focus,.barra-filtros input:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-claro)}
+  .busca-campo{position:relative;flex:1;max-width:340px;min-width:220px}
+  .busca-campo svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--cinza);fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none}
+  .barra-filtros .busca-campo input{width:100%;max-width:none;padding-left:32px}
   .f-resumo{font-size:12.5px;color:var(--cinza);margin-left:auto}
   .filtros-sit{display:flex;gap:6px;flex-wrap:wrap;padding:12px 20px 0}
   .filtros-sit .filtro{padding:5px 12px;font-size:12.5px}
@@ -810,6 +813,10 @@
             <div><h3>Quais obrigações cada empresa tem</h3><span class="sub">Ligue ou desligue cada obrigação. Clique no nome de uma obrigação para apontar, de uma vez, quais empresas a têm.</span></div>
             <div class="acoes vig"><label for="vigMes">Vale a partir da competência</label><select id="vigMes"></select><select id="vigAno"></select></div>
           </div>
+          <div class="barra-filtros">
+            <div class="busca-campo"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="buscaMatriz" placeholder="Pesquisar por nome, código ou CNPJ da empresa"></div>
+            <span class="f-resumo" id="resumoMatriz"></span>
+          </div>
           <div id="vigAviso"></div>
           <div class="tabela-wrap" style="margin-top:12px"><table class="tabela-matriz" id="tabMatriz">
             <thead id="cabMatriz"></thead>
@@ -894,7 +901,7 @@
           <div class="barra-filtros">
             <select id="fObrig" title="Filtrar por obrigação"></select>
             <select id="fResp" title="Filtrar por responsável"></select>
-            <input type="search" id="fBusca" placeholder="Buscar empresa, código ou CNPJ">
+            <div class="busca-campo"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="fBusca" placeholder="Pesquisar por nome, código ou CNPJ da empresa"></div>
             <button class="btn btn-secundario" id="fLimpar" style="display:none">Limpar filtros</button>
             <span class="f-resumo" id="fResumo"></span>
           </div>
@@ -913,6 +920,10 @@
         <div class="cartao">
           <div class="cartao-cab">
             <div><h3 id="tituloDecimo"></h3><span class="sub">Controle das parcelas por empresa</span></div>
+          </div>
+          <div class="barra-filtros">
+            <div class="busca-campo"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="buscaDecimo" placeholder="Pesquisar por nome, código ou CNPJ da empresa"></div>
+            <span class="f-resumo" id="resumoDecimo"></span>
           </div>
           <div class="info-box">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
@@ -2099,11 +2110,20 @@
     }
     return s.tipo !== 'na';
   }
+  // Pesquisa por nome, código ou CNPJ (sem diferenciar acentos e maiúsculas)
+  function casaBusca(emp, termo){
+    var b = normalizar(termo);
+    if (!b) return true;
+    var alvo = normalizar(emp.codigo + ' ' + emp.razao + ' ' + emp.cnpj + ' ' + emp.cnpj.replace(/\D/g, ''));
+    return b.split(/\s+/).every(function(p){ return alvo.indexOf(p) !== -1; });
+  }
+  function resumoBusca(id, mostradas, total, termo){
+    document.getElementById(id).textContent = termo ? 'Mostrando ' + mostradas + ' de ' + total + (total === 1 ? ' empresa' : ' empresas') : total + (total === 1 ? ' empresa' : ' empresas');
+  }
   function empresaPassaFiltro(emp){
     if (filtroObrig.resp === 'sem' && membro(emp.responsavel)) return false;
     if (filtroObrig.resp !== 'todos' && filtroObrig.resp !== 'sem' && emp.responsavel !== filtroObrig.resp) return false;
-    var b = normalizar(filtroObrig.busca);
-    if (b && normalizar(emp.codigo + ' ' + emp.razao + ' ' + emp.cnpj + ' ' + emp.cnpj.replace(/\D/g, '')).indexOf(b) === -1) return false;
+    if (!casaBusca(emp, filtroObrig.busca)) return false;
     return true;
   }
 
@@ -2239,7 +2259,9 @@
   }
   function renderMatriz(){
     renderVigencia();
-    var cols = OBRIGACOES, emps = empresasEscopo(), bloq = fechadasDesde(vigencia);
+    var termoM = document.getElementById('buscaMatriz').value, baseM = empresasEscopo();
+    var cols = OBRIGACOES, emps = baseM.filter(function(e){ return casaBusca(e, termoM); }), bloq = fechadasDesde(vigencia);
+    resumoBusca('resumoMatriz', emps.length, baseM.length, termoM);
     document.getElementById('tabMatriz').classList.toggle('travada-m', bloq.length > 0);
     document.getElementById('vigAviso').innerHTML = bloq.length
       ? '<div class="fech-alerta vig-aviso"><b>Competência ' + textoComp(bloq[0]) + ' fechada.</b> Para mudar as obrigações, escolha uma competência em aberto (posterior a ' + textoComp(bloq[bloq.length - 1]) + ') ou reabra a competência fechada.</div>' : '';
@@ -2248,7 +2270,7 @@
       emps.forEach(function(e){ var c = situacaoConfig(e, ob, vigencia); if (!c.fixo){ apl++; if (c.ativa) tem++; } });
       return '<th class="obcol"><button data-col="' + ob.id + '" title="Apontar quais empresas têm ' + esc(ob.nome) + '">' + esc(ob.nome) + '</button><small>' + tem + ' de ' + apl + ' têm</small></th>';
     }).join('') + '<th class="num">Total</th></tr>';
-    if (!emps.length){ document.getElementById('corpoMatriz').innerHTML = '<tr><td colspan="' + (cols.length + 2) + '" class="vazio-lista">Nenhuma empresa ' + (nomeEscopo() ? 'em ' + esc(nomeEscopo()) : 'cadastrada') + '.</td></tr>'; return; }
+    if (!emps.length){ document.getElementById('corpoMatriz').innerHTML = '<tr><td colspan="' + (cols.length + 2) + '" class="vazio-lista">' + (termoM ? 'Nenhuma empresa encontrada para "' + esc(termoM) + '".' : 'Nenhuma empresa ' + (nomeEscopo() ? 'em ' + esc(nomeEscopo()) : 'cadastrada') + '.') + '</td></tr>'; return; }
     document.getElementById('corpoMatriz').innerHTML = linhasAgrupadas(emps, cols.length + 2, function(emp){
       var tem = 0, apl = 0;
       var cel = cols.map(function(ob){
@@ -2313,6 +2335,8 @@
     aviso(nomeObrig(colAtual) + ': ' + (on || off ? (on ? on + ' ativada(s)' : '') + (on && off ? ', ' : '') + (off ? off + ' desativada(s)' : '') + ' a partir de ' + textoComp(vigencia) : 'nenhuma mudança'));
   });
   document.getElementById('btnConfigObrig').addEventListener('click', function(){ abrirSecao('obrigemp'); });
+  document.getElementById('buscaMatriz').addEventListener('input', renderMatriz);
+  document.getElementById('buscaDecimo').addEventListener('input', renderDecimo);
 
   /* ---------- Meses da contribuição sindical ---------- */
   var mesesEmp = null;
@@ -2495,7 +2519,12 @@
 
     if (!empresasEscopo().length){ document.getElementById('corpoDecimo').innerHTML = '<tr><td colspan="4" class="vazio-lista">Nenhuma empresa ' + (nomeEscopo() ? 'em ' + esc(nomeEscopo()) : 'cadastrada') + '.</td></tr>'; return; }
 
-    document.getElementById('corpoDecimo').innerHTML = linhasAgrupadas(empresasEscopo().filter(function(e){ return iniciouEm(e, COMP_ANO + '-12'); }), 4, function(emp){
+    var termoDec = document.getElementById('buscaDecimo').value;
+    var baseDec = empresasEscopo().filter(function(e){ return iniciouEm(e, COMP_ANO + '-12'); });
+    var listaDec = baseDec.filter(function(e){ return casaBusca(e, termoDec); });
+    resumoBusca('resumoDecimo', listaDec.length, baseDec.length, termoDec);
+    if (!listaDec.length){ document.getElementById('corpoDecimo').innerHTML = '<tr><td colspan="4" class="vazio-lista">Nenhuma empresa encontrada para "' + esc(termoDec) + '".</td></tr>'; return; }
+    document.getElementById('corpoDecimo').innerHTML = linhasAgrupadas(listaDec, 4, function(emp){
       var d = decimoDe(emp.codigo, COMP_ANO);
       function celula(p, venc){
         var info = d[p] || {};
