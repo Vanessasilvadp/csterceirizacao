@@ -480,6 +480,15 @@
   .vig select{padding:7px 10px;border:1px solid var(--borda);border-radius:8px;background:var(--branco);font-size:13px;outline:none}
   .vig select:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-claro)}
   .vig-aviso{margin:14px 20px 0}
+  .meses-link{display:inline-block;margin-top:4px;background:var(--teal-claro);color:var(--teal);border:none;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600;cursor:pointer}
+  .meses-link:hover{background:#CFE2E8}
+  .meses-link.espec{background:var(--terracota-claro);color:var(--terracota)}
+  .meses-grade{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+  .meses-grade label{display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--borda);border-radius:8px;padding:8px 4px;font-size:13px;cursor:pointer;background:var(--branco)}
+  .meses-grade label.marcada{border-color:var(--teal);background:var(--teal-claro);color:var(--teal);font-weight:600}
+  .meses-grade input{accent-color:var(--teal);margin:0}
+  .meses-grade.desab{opacity:.45;pointer-events:none}
+  @media (max-width:520px){ .meses-grade{grid-template-columns:repeat(4,1fr)} }
   .col-lista{border:1px solid var(--bege);border-radius:8px;max-height:360px;overflow-y:auto}
   .col-lista .grp{padding:7px 12px;background:var(--teal-claro);font-weight:700;font-size:12.5px;color:var(--teal-escuro);position:sticky;top:0}
   .col-lista label{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--bege);cursor:pointer;font-size:13px}
@@ -1038,6 +1047,13 @@
       <div class="campo"><label for="empRazao">Razão Social</label><input type="text" id="empRazao" placeholder="Ex.: Comércio Exemplo Ltda"></div>
       <div class="campo"><label for="empCnpj">CNPJ</label><input type="text" id="empCnpj" placeholder="00.000.000/0000-00" maxlength="18" inputmode="numeric"></div>
       <div class="campo"><label for="empResp">Responsável</label><select id="empResp"></select></div>
+      <div class="campo"><label>Folha da empresa</label>
+        <div class="opcoes" id="empTipo">
+          <label class="opcao"><input type="radio" name="empTipo" value="empregados">Com empregados</label>
+          <label class="opcao"><input type="radio" name="empTipo" value="prolabore">Só pró-labore</label>
+        </div>
+        <div class="dica">Empresa só com pró-labore fica dispensada do FGTS Digital e do 13º salário.</div>
+      </div>
       <div class="campo"><label for="empIniMes">Início das responsabilidades (competência)</label>
         <div class="linha-campos"><select id="empIniMes"></select><select id="empIniAno"></select></div>
         <div class="dica">A empresa só entra nos controles a partir desta competência.</div>
@@ -1182,6 +1198,23 @@
     <div class="modal-cab"><h3 id="impTitulo">Importar planilha</h3><button class="btn-icone" data-fechar title="Fechar"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
     <div class="modal-corpo" id="importResumo"></div>
     <div class="modal-rodape"><button class="btn btn-secundario" data-fechar>Cancelar</button><button class="btn btn-primario" id="importOk">Importar</button></div>
+  </div>
+</div>
+
+<!-- MODAL: MESES DA CONTRIBUIÇÃO SINDICAL -->
+<div class="modal-fundo" id="modalMeses">
+  <div class="modal">
+    <div class="modal-cab"><div><h3>Meses da Contribuição Sindical</h3><span class="sub" id="mesesSub" style="font-size:12.5px;color:var(--cinza)"></span></div><button class="btn-icone" data-fechar title="Fechar"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-corpo">
+      <div class="opcoes" id="mesesModo">
+        <label class="opcao"><input type="radio" name="mesesModo" value="todos">Todo mês</label>
+        <label class="opcao"><input type="radio" name="mesesModo" value="espec">Somente em alguns meses</label>
+      </div>
+      <div class="meses-grade" id="mesesGrade"></div>
+      <p class="dica-txt">Marque o mês da <b>competência</b> (folha) em que há contribuição — o vencimento é no dia 10 do mês seguinte. Nos outros meses a obrigação não aparece no checklist dessa empresa. Vale a partir da competência indicada acima; as anteriores não mudam.</p>
+      <span class="erro" id="mesesErro"></span>
+    </div>
+    <div class="modal-rodape"><button class="btn btn-secundario" data-fechar>Cancelar</button><button class="btn btn-primario" id="mesesSalvar">Salvar</button></div>
   </div>
 </div>
 
@@ -1584,6 +1617,25 @@
     ps.forEach(function(x){ if (x.de > chave && (!f || x.de < f.de)) f = x; });
     return f;
   }
+  // Contribuição sindical: meses (1-12) da competência em que existe; null = todo mês.
+  // Histórico com vigência: emp.sindMeses = [{ de:'AAAA-MM', meses:[3,4] | null }]
+  function mesesSindical(emp, chave){
+    var h = emp.sindMeses || [], r = null;
+    h.forEach(function(x){ if (x.de <= (chave || COMP_CHAVE)) r = x; });
+    return r ? r.meses : null;
+  }
+  function definirMesesSindical(emp, meses, chave){
+    var h = (emp.sindMeses || []).filter(function(x){ return x.de < chave; });
+    var ant = h.length ? h[h.length - 1].meses : null;
+    if (JSON.stringify(ant) !== JSON.stringify(meses)) h.push({ de:chave, meses:meses });
+    if (h.length) emp.sindMeses = h; else delete emp.sindMeses;
+  }
+  function textoMeses(meses){
+    if (!meses) return 'Todo mês';
+    var ab = meses.map(function(m){ var t = MESES_ABREV[m - 1]; return t.charAt(0).toUpperCase() + t.slice(1); });
+    return ab.length > 4 ? ab.length + ' meses' : ab.join(', ');
+  }
+  function mudancaFuturaMeses(emp, chave){ return (emp.sindMeses || []).filter(function(x){ return x.de > chave; })[0] || null; }
   function textoInativa(per){ return per.de === '0000-00' ? 'não tem' : 'desde ' + textoComp(per.de); }
   // Competências fechadas a partir de uma competência (mudanças nelas são bloqueadas)
   function fechadasDesde(chave){ return Object.keys(dados.fechamentos || {}).filter(function(k){ return k >= chave; }).sort(); }
@@ -1676,6 +1728,7 @@
     if (!iniciouEm(emp)) return { tipo:'na', motivo:'antes' };
     if (ob.id === 'fgts13' && !temFgts13(emp)) return { tipo:'na' };
     if (ob.id === 'adiant' && !(emp.folha && emp.folha.adiantamento)) return { tipo:'na' };
+    if (ob.id === 'sindical'){ var ms = mesesSindical(emp); if (ms && ms.indexOf(COMP_MES + 1) === -1) return { tipo:'na', motivo:'mesSind', meses:ms }; }
     if ((ob.id === 'fgts' || ob.id === 'fgts13') && ehProlabore(emp)) return { tipo:'dispensada', motivo:'prolabore' };
     if (ob.id !== 'fgts13'){ var per = inativaEm(emp, ob.id); if (per) return { tipo:'dispensada', motivo:'desativada', periodo:per }; }
     var venc = ob.venc(COMP_ANO, COMP_MES, emp);
@@ -1826,7 +1879,7 @@
           return aberto ? '<span class="tag' + (aberto.de === '0000-00' ? '' : ' off') + '" title="' + esc(nomeObrig(id)) + ': ' + textoInativa(aberto) + '">' + esc(nomeObrig(id)) + (aberto.de === '0000-00' ? '' : ' · desde ' + textoComp(aberto.de)) + '</span>' : '';
         }).join('') || '<span class="sem-resp">—</span>';
       return '<tr' + attrLinha(emp) + '><td><span class="codigo">' + esc(emp.codigo) + '</span></td>' +
-        '<td class="razao">' + esc(emp.razao) + '</td><td class="mono">' + esc(emp.cnpj) + '</td>' +
+        '<td class="razao">' + esc(emp.razao) + '<span style="display:block;margin-top:4px">' + (ehProlabore(emp) ? '<span class="badge-folha prolabore">Só pró-labore</span>' : '<span class="badge-folha empregados">Com empregados</span>') + '</span></td><td class="mono">' + esc(emp.cnpj) + '</td>' +
         '<td>' + chipResp(emp.responsavel) + '</td><td style="white-space:nowrap">' + textoInicio(emp) + (iniciouEm(emp) ? '' : '<span class="txt-sec">ainda não iniciada</span>') + '</td><td>' + disp + '</td>' +
         '<td class="acoes-col"><button class="btn-icone" data-acao="editar" data-cod="' + esc(emp.codigo) + '" title="Editar">' + IC_EDITAR + '</button>' +
         '<button class="btn-icone perigo" data-acao="excluir" data-cod="' + esc(emp.codigo) + '" title="Excluir">' + IC_EXCLUIR + '</button></td></tr>';
@@ -1876,11 +1929,15 @@
     var pIni = (e && e.inicio ? e.inicio : padraoInicio()).split('-');
     document.getElementById('empIniMes').value = pIni[1];
     document.getElementById('empIniAno').value = pIni[0];
+    var tipoAtual = e && e.folha && e.folha.tipo === 'prolabore' ? 'prolabore' : 'empregados';
+    document.querySelectorAll('input[name=empTipo]').forEach(function(r){ r.checked = r.value === tipoAtual; });
+    marcarOpcoes('empTipo');
     document.getElementById('empEscritorio').value = e ? (escDe(e) ? e.escritorio : '') :
       (escritorio(escritorioAtivo) ? escritorioAtivo : (dados.escritorios.length === 1 ? dados.escritorios[0].id : ''));
     document.getElementById('empErro').style.display = 'none';
     abrirModal('modalEmpresa', 'empRazao');
   }
+  document.getElementById('empTipo').addEventListener('change', function(){ marcarOpcoes('empTipo'); });
   document.getElementById('empCnpj').addEventListener('input', function(){ this.value = mascaraCnpj(this.value); });
   document.getElementById('btnNovaEmpresa').addEventListener('click', function(){ abrirModalEmpresa(null); });
   document.getElementById('empSalvar').addEventListener('click', function(){
@@ -1904,14 +1961,18 @@
   function gravarEmpresa(cod, razao, cnpj, resp){
     var escSel = document.getElementById('empEscritorio').value;
     var iniSel = document.getElementById('empIniAno').value + '-' + document.getElementById('empIniMes').value;
+    var tipoSel = (document.querySelector('input[name=empTipo]:checked') || {}).value || 'empregados';
     if (empEditando){
       var e = empresa(empEditando);
       if (cod !== empEditando) renomearCodigo(empEditando, cod);
       e.codigo = cod; e.razao = razao; e.cnpj = cnpj; e.responsavel = resp; e.escritorio = escSel; e.inicio = iniSel;
-      aviso('Empresa atualizada');
+      if (!e.folha) e.folha = folhaPadrao();
+      var tipoAntes = e.folha.tipo || 'empregados';
+      e.folha.tipo = tipoSel;
+      aviso(tipoSel !== tipoAntes ? (tipoSel === 'prolabore' ? 'Empresa atualizada — só pró-labore: FGTS Digital dispensado' : 'Empresa atualizada — com empregados: FGTS Digital voltou a ser cobrado') : 'Empresa atualizada');
     } else {
-      dados.empresas.push({ codigo:cod, razao:razao, cnpj:cnpj, responsavel:resp, escritorio:escSel, inicio:iniSel, inativas:{}, folha:folhaPadrao() });
-      aviso('Empresa ' + cod + ' cadastrada');
+      dados.empresas.push({ codigo:cod, razao:razao, cnpj:cnpj, responsavel:resp, escritorio:escSel, inicio:iniSel, inativas:{}, folha:(function(){ var f = folhaPadrao(); f.tipo = tipoSel; return f; })() });
+      aviso('Empresa ' + cod + ' cadastrada' + (tipoSel === 'prolabore' ? ' (só pró-labore)' : ''));
     }
     salvar(); fecharModal('modalEmpresa'); renderTudo();
   }
@@ -2113,7 +2174,8 @@
         var esm = (filtroObrig.sit !== 'todas' && !casa) ? ' esmaecida' : '';
         var ref = ' data-emp="' + esc(emp.codigo) + '" data-obrig="' + ob.id + '"';
         if (s.tipo === 'na'){
-          var motivoNa = ob.id === 'adiant' ? 'Empresa sem adiantamento salarial' : 'Sem pagamento da 1ª parcela nesta competência';
+          var motivoNa = s.motivo === 'mesSind' ? 'Contribuição sindical só em: ' + textoMeses(s.meses) : ob.id === 'adiant' ? 'Empresa sem adiantamento salarial' : 'Sem pagamento da 1ª parcela nesta competência';
+          if (s.motivo === 'mesSind'){ linha += '<td class="cel' + esm + '"><span class="nao-aplica" title="' + motivoNa + '">—</span><div class="cel-motivo" title="' + motivoNa + '">fora do mês<br>(' + textoMeses(s.meses) + ')</div></td>'; return; }
           linha += '<td class="cel' + esm + '"><span class="nao-aplica" title="' + motivoNa + '">—</span></td>';
         } else if (s.tipo === 'dispensada'){
           linha += '<td class="cel dispensada' + esm + '"><span class="st dispensada">' + IC_DISPENSAR + 'Não tem</span>' +
@@ -2194,7 +2256,9 @@
         if (c.fixo) return '<td class="mcel"><span class="m-fixo" title="' + esc(c.dica) + '">' + c.fixo + '</span></td>';
         apl++; if (c.ativa) tem++;
         return '<td class="mcel' + (c.ativa ? '' : ' off') + '"><button class="sw' + (c.ativa ? ' on' : '') + '" data-emp="' + esc(emp.codigo) + '" data-ob="' + ob.id + '" title="' + esc(ob.nome) + ': ' + (c.ativa ? 'tem — clique para desativar' : 'não tem — clique para ativar') + '" aria-pressed="' + c.ativa + '"></button>' +
-          '<span class="m-sub' + (c.ativa && !c.futura ? '' : ' off') + '">' + (c.ativa ? (c.futura ? 'Tem · sai em ' + textoComp(c.futura.de) : 'Tem') : textoInativa(c.periodo).replace(/^n/, 'N').replace(/^d/, 'D')) + '</span></td>';
+          '<span class="m-sub' + (c.ativa && !c.futura ? '' : ' off') + '">' + (c.ativa ? (c.futura ? 'Tem · sai em ' + textoComp(c.futura.de) : 'Tem') : textoInativa(c.periodo).replace(/^n/, 'N').replace(/^d/, 'D')) + '</span>' +
+          (ob.id === 'sindical' && c.ativa ? (function(){ var ms = mesesSindical(emp, vigencia), fut = mudancaFuturaMeses(emp, vigencia);
+            return '<button class="meses-link' + (ms ? ' espec' : '') + '" data-meses="' + esc(emp.codigo) + '" title="Definir em quais meses há contribuição' + (fut ? ' — muda em ' + textoComp(fut.de) + ' para: ' + textoMeses(fut.meses) : '') + '">' + textoMeses(ms) + (fut ? ' *' : '') + '</button>'; })() : '') + '</td>';
       }).join('');
       var ini = !iniciouEm(emp, vigencia) ? '<small style="color:var(--terracota)">início em ' + textoInicio(emp) + '</small>' : '';
       return '<tr' + attrLinha(emp) + '>' + celulaEmpresa(emp).replace('</small></td>', '</small>' + ini + '</td>') + cel + '<td class="num"><b>' + tem + '</b> de ' + apl + '</td></tr>';
@@ -2227,7 +2291,7 @@
         var c = situacaoConfig(emp, ob, vigencia);
         html += c.fixo
           ? '<label class="fixo"><input type="checkbox" disabled><span><b>' + esc(emp.codigo) + '</b> ' + esc(emp.razao) + '</span><small>' + c.fixo + '</small></label>'
-          : '<label><input type="checkbox" data-emp="' + esc(emp.codigo) + '"' + (c.ativa ? ' checked' : '') + '><span><b>' + esc(emp.codigo) + '</b> ' + esc(emp.razao) + '</span><small>' + (c.ativa ? (c.futura ? 'sai em ' + textoComp(c.futura.de) : '') : textoInativa(c.periodo)) + '</small></label>';
+          : '<label><input type="checkbox" data-emp="' + esc(emp.codigo) + '"' + (c.ativa ? ' checked' : '') + '><span><b>' + esc(emp.codigo) + '</b> ' + esc(emp.razao) + '</span><small>' + (c.ativa ? (c.futura ? 'sai em ' + textoComp(c.futura.de) : (ob.id === 'sindical' && mesesSindical(emp, vigencia) ? textoMeses(mesesSindical(emp, vigencia)) : '')) : textoInativa(c.periodo)) + '</small></label>';
       });
     });
     document.getElementById('colLista').innerHTML = html || '<div class="vazio-lista">Nenhuma empresa.</div>';
@@ -2249,6 +2313,44 @@
     aviso(nomeObrig(colAtual) + ': ' + (on || off ? (on ? on + ' ativada(s)' : '') + (on && off ? ', ' : '') + (off ? off + ' desativada(s)' : '') + ' a partir de ' + textoComp(vigencia) : 'nenhuma mudança'));
   });
   document.getElementById('btnConfigObrig').addEventListener('click', function(){ abrirSecao('obrigemp'); });
+
+  /* ---------- Meses da contribuição sindical ---------- */
+  var mesesEmp = null;
+  function ajustarMeses(){
+    var espec = (document.querySelector('input[name=mesesModo]:checked') || {}).value === 'espec';
+    document.getElementById('mesesGrade').classList.toggle('desab', !espec);
+    marcarOpcoes('mesesModo');
+    document.querySelectorAll('#mesesGrade label').forEach(function(l){ l.classList.toggle('marcada', espec && l.querySelector('input').checked); });
+  }
+  document.getElementById('corpoMatriz').addEventListener('click', function(e){
+    var b = e.target.closest('[data-meses]'); if (!b) return;
+    e.stopPropagation();
+    if (fechadasDesde(vigencia).length){ aviso('Há competência fechada a partir de ' + textoComp(vigencia) + ' — escolha outra competência'); return; }
+    mesesEmp = empresa(b.getAttribute('data-meses'));
+    var ms = mesesSindical(mesesEmp, vigencia);
+    document.getElementById('mesesSub').textContent = mesesEmp.codigo + ' — ' + mesesEmp.razao + ' · vale a partir de ' + textoComp(vigencia) + (mesesEmp.folha && mesesEmp.folha.sindicato ? ' · ' + mesesEmp.folha.sindicato : '');
+    document.getElementById('mesesGrade').innerHTML = MESES.map(function(m, i){
+      return '<label><input type="checkbox" value="' + (i + 1) + '"' + (ms && ms.indexOf(i + 1) !== -1 ? ' checked' : '') + '>' + m.slice(0, 3) + '</label>';
+    }).join('');
+    document.querySelectorAll('input[name=mesesModo]').forEach(function(r){ r.checked = r.value === (ms ? 'espec' : 'todos'); });
+    document.getElementById('mesesErro').style.display = 'none';
+    ajustarMeses();
+    abrirModal('modalMeses', null);
+  }, true);
+  document.getElementById('mesesModo').addEventListener('change', ajustarMeses);
+  document.getElementById('mesesGrade').addEventListener('change', ajustarMeses);
+  document.getElementById('mesesSalvar').addEventListener('click', function(){
+    var espec = (document.querySelector('input[name=mesesModo]:checked') || {}).value === 'espec';
+    var meses = null;
+    if (espec){
+      meses = Array.prototype.map.call(document.querySelectorAll('#mesesGrade input:checked'), function(i){ return +i.value; });
+      if (!meses.length){ mostrarErro('mesesErro', 'Marque pelo menos um mês — ou escolha "Todo mês". Se a empresa não tem contribuição, desligue a chave da obrigação.'); return; }
+      if (meses.length === 12) meses = null;
+    }
+    definirMesesSindical(mesesEmp, meses, vigencia);
+    salvar(); fecharModal('modalMeses'); renderTudo();
+    aviso('Contribuição sindical de ' + mesesEmp.codigo + ': ' + textoMeses(meses).toLowerCase() + ' a partir de ' + textoComp(vigencia));
+  });
 
   /* ---------- Entrega geral (marcar todas de uma vez) ---------- */
   var ultimoLote = null;
@@ -2825,7 +2927,8 @@
       var rpa = f.rpa ? '<b>Sim</b>' + (f.rpaObs ? '<span class="txt-sec">' + esc(f.rpaObs) + '</span>' : '') : 'Não';
       var ent = (f.entrega || []).length ? f.entrega.map(function(m){ return '<span class="tag">' + esc(m) + '</span>'; }).join('') : '<span class="sem-resp">Não definido</span>';
       return '<tr' + attrLinha(emp) + ' data-cod="' + esc(emp.codigo) + '" title="Clique para editar as particularidades">' + celulaEmpresa(emp) +
-        '<td class="sind">' + (f.sindicato ? esc(f.sindicato) : '<span class="sem-resp">—</span>') + '</td>' +
+        '<td class="sind">' + (f.sindicato ? esc(f.sindicato) : '<span class="sem-resp">—</span>') +
+          (inativaEm(emp, 'sindical') ? '<span class="txt-sec">Sem contribuição sindical</span>' : '<span class="txt-sec">Contribuição: ' + textoMeses(mesesSindical(emp)).toLowerCase() + '</span>') + '</td>' +
         '<td>' + db + '</td><td>' + adi + '</td><td>' + tipo + '</td><td class="rpa">' + rpa + '</td><td>' + ent + '</td>' +
         '<td class="acoes-col"><button class="btn-icone" data-acao="editar" data-cod="' + esc(emp.codigo) + '" title="Editar particularidades">' + IC_EDITAR + '</button></td></tr>';
     });
@@ -3446,7 +3549,8 @@
     diaAdiant:['diadoadiantamento','diaadiantamento'], tipo:['tipodefolha','tipofolha','folha'],
     inicio:['iniciodasresponsabilidades','iniciomesano','inicio','iniciodoatendimento','competenciainicial','iniciodasresponsabilidadesmesano'],
     rpa:['rpasimnao','rpa','temrpa'], rpaObs:['observacaodorpa','observacaorpa','obsrpa'], entrega:['mododeentrega','modosdeentrega','entrega'],
-    escritorio:['escritorio','escritoriocontabil','contabilidade','nomedoescritorio']
+    escritorio:['escritorio','escritoriocontabil','contabilidade','nomedoescritorio'],
+    mesesSind:['mesesdacontribuicaosindical','contribuicaosindicalmeses','mesesdacontribuicao','contribuicaosindical','mesessindical']
   };
   var COLUNAS_ESC = {
     nome:['nomedoescritorio','escritoriocontabil','escritorio','nome'], cnpj:['cnpj','cnpjdoescritorio'],
@@ -3519,6 +3623,20 @@
       return idx >= 0 ? an + '-' + dois(idx + 1) : null;
     }
     return null;
+  }
+  // "Todo mês" → null; "mar, abr" / "3;4" / "Março e Abril" → [3,4]; inválido → undefined
+  function mesesDeTexto(v){
+    var t = normalizar(v);
+    if (!t) return undefined;
+    if (/^(todo|todos|mensal|todo mes|todos os meses|sim)$/.test(t.replace(/\s+/g, ' '))) return null;
+    var nomes = MESES.map(function(x){ return normalizar(x).slice(0, 3); }), out = [], ok = true;
+    t.replace(/\s+e\s+/g, ',').split(/[\s,;\/+-]+/).filter(Boolean).forEach(function(p){
+      var n = /^\d+$/.test(p) ? +p : nomes.indexOf(p.slice(0, 3)) + 1;
+      if (n >= 1 && n <= 12){ if (out.indexOf(n) === -1) out.push(n); } else ok = false;
+    });
+    if (!ok || !out.length) return undefined;
+    out.sort(function(a, b){ return a - b; });
+    return out.length === 12 ? null : out;
   }
   function simNao(v){ return ['sim','s','x','true','1','verdadeiro','yes'].indexOf(normalizar(v)) !== -1; }
   function mesDe(v){
@@ -3600,6 +3718,7 @@
       if (l.tipo) c.tipo = normalizar(l.tipo).indexOf('pro') !== -1 ? 'prolabore' : 'empregados';
       if (l.rpa) c.rpa = simNao(l.rpa);
       if (l.rpaObs) c.rpaObs = l.rpaObs;
+      if (l.mesesSind){ var msI = mesesDeTexto(l.mesesSind); if (msI === undefined) plano.avisos.push(ident + ': meses da contribuição sindical "' + l.mesesSind + '" não reconhecidos — use "Todo mês" ou os meses, ex.: mar, abr'); else item0.mesesSind = msI; }
       if (l.inicio){ var ini = inicioDe(l.inicio); if (ini === null) plano.avisos.push(ident + ': início "' + l.inicio + '" não reconhecido — use mês/ano, ex.: 10/2026'); else item0.inicio = ini; }
       if (l.entrega) c.entrega = l.entrega.split(/[,;\/]+/).map(function(x){ return x.trim(); }).filter(Boolean);
       if (c.adiantamento && c.percAdiant === undefined && !(existente && existente.folha.percAdiant)) plano.avisos.push(ident + ': adiantamento marcado sem percentual — informe depois em Folha de Pagamento');
@@ -3613,7 +3732,7 @@
         }
         escRef = escMapa[ke];
       } else if (!existente && (dados.escritorios.length || plano.novosEsc.length)) plano.avisos.push(ident + ': sem escritório informado — ficará como "Sem escritório"');
-      var item = { linha:n, cod:cod, razao:razao, cnpj:cnpj, respRef:respRef, respNome:l.responsavel || '', escRef:escRef, escNome:escRef ? escRef.nome : '', inicio:item0.inicio, campos:c };
+      var item = { linha:n, cod:cod, razao:razao, cnpj:cnpj, respRef:respRef, respNome:l.responsavel || '', escRef:escRef, escNome:escRef ? escRef.nome : '', inicio:item0.inicio, mesesSind:item0.mesesSind, campos:c };
       (existente ? plano.atualizadas : plano.novas).push(item);
     });
     plano.novosResp = Object.keys(novosResp).map(function(k){ return novosResp[k]; });
@@ -3654,6 +3773,7 @@
     plano.novas.forEach(function(it){
       var f = folhaPadrao(); aplicarFolha(f, it.campos);
       dados.empresas.push({ codigo:it.cod, razao:it.razao, cnpj:it.cnpj, responsavel:idResp(it.respRef) || '', escritorio:idEsc(it.escRef) || '', inicio:it.inicio || padraoInicio(), inativas:{}, folha:f });
+      if (it.mesesSind !== undefined && it.mesesSind !== null) dados.empresas[dados.empresas.length - 1].sindMeses = [{ de:'0000-00', meses:it.mesesSind }];
     });
     plano.atualizadas.forEach(function(it){
       var e = empresa(it.cod);
@@ -3661,6 +3781,7 @@
       var r = idResp(it.respRef); if (r !== undefined) e.responsavel = r;
       var es = idEsc(it.escRef); if (es !== undefined) e.escritorio = es;
       if (it.inicio) e.inicio = it.inicio;
+      if (it.mesesSind !== undefined){ var cpI = competenciaAtualPadrao(); definirMesesSindical(e, it.mesesSind, cpI.a + '-' + dois(cpI.m + 1)); }
       if (!e.folha) e.folha = folhaPadrao();
       aplicarFolha(e.folha, it.campos);
     });
