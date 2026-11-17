@@ -441,8 +441,24 @@
   .comp-rotulo span{display:block;font-size:10.5px;opacity:.8}
   .seletor-comp.fora-atual{background:var(--terracota-claro)}
   .seletor-comp.fora-atual .comp-rotulo,.seletor-comp.fora-atual .btn-icone{color:var(--terracota)}
-  .seletor-comp.fora-atual .comp-rotulo span::after{content:" · voltar à atual";font-weight:600}
+  .seletor-comp.fora-atual #compVenc::after{content:" · voltar à atual";font-weight:600}
   .btn-backup{padding:8px 12px}
+  .btn-fechar{padding:8px 12px;background:var(--terracota);color:#fff;border-color:var(--terracota)}
+  .btn-fechar:hover{background:#8F3802}
+  .btn-fechar.fechada{background:var(--verde-claro);color:var(--verde);border-color:#BFDCC9}
+  .btn-fechar.fechada:hover{background:#D3E9DB}
+  #compEstado{display:inline}
+  .seletor-comp .cad{display:none;width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;vertical-align:-1px;margin-right:3px}
+  .seletor-comp.fechada .cad{display:inline-block}
+  .faixa-fechada{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 20px 0;padding:12px 14px;border-radius:8px;background:var(--verde-claro);color:#1F5C39;font-size:13px;border:1px solid #BFDCC9}
+  .faixa-fechada svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+  .faixa-fechada .btn{margin-left:auto}
+  .travada .chk,.travada .btn-disp,.travada .envio,.travada .link-mini{pointer-events:none;opacity:.55}
+  .fech-alerta{padding:12px 14px;border-radius:8px;background:var(--vermelho-claro);color:#7A1B15;font-size:13px;border:1px solid #EBC3BF}
+  .fech-ok{padding:12px 14px;border-radius:8px;background:var(--verde-claro);color:#1F5C39;font-size:13px;border:1px solid #BFDCC9}
+  .fech-aviso{padding:10px 14px;border-radius:8px;background:var(--ambar-claro);color:var(--ambar-texto);font-size:12.5px;border:1px solid #EED9A0}
+  .campo-check.alerta input{accent-color:var(--vermelho)}
+  #fechConfirmar[disabled]{opacity:.45;cursor:not-allowed}
 
   /* ===== Filtros das obrigações ===== */
   .barra-filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:14px 20px;border-bottom:1px solid var(--borda);background:var(--cinza-claro)}
@@ -577,7 +593,7 @@
     .btn-menu{display:flex}
     .conteudo{padding:calc(var(--topo-altura) + 18px) 16px 18px}
     .topo-titulo p{display:none}
-    .btn-backup span,.comp-rotulo small,.comp-rotulo span{display:none}
+    .btn-backup span,.btn-fechar span,.comp-rotulo small,.comp-rotulo span{display:none}
     .comp-rotulo{min-width:0}
     .fundo-menu.visivel{display:block;position:fixed;inset:0;background:rgba(22,22,22,.35);z-index:25}
     .cal-dia{min-height:62px;padding:4px}
@@ -587,6 +603,8 @@
     .linha-campos{grid-template-columns:1fr}
   }
   @media (max-width:520px){
+    .topo-titulo{display:none}
+    .topo-direita{margin-left:auto}
     .kpis{grid-template-columns:1fr}
     .competencia{padding:6px 10px}
   }
@@ -683,9 +701,10 @@
         <div class="topo-hoje" id="topoHoje"></div>
         <div class="seletor-comp" id="seletorComp">
           <button class="btn-icone" id="compAnt" title="Competência anterior"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-          <button class="comp-rotulo" id="compRotulo"><small>Competência</small><b id="compNome"></b><span id="compVenc"></span></button>
+          <button class="comp-rotulo" id="compRotulo"><small><svg class="cad" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span id="compEstado">Competência</span></small><b id="compNome"></b><span id="compVenc"></span></button>
           <button class="btn-icone" id="compProx" title="Próxima competência"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
         </div>
+        <button class="btn btn-fechar" id="btnFechar"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span id="btnFecharTxt">Fechar competência</span></button>
         <button class="btn btn-secundario btn-backup" id="btnBackupTopo" title="Exportar backup de todos os dados (JSON)"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg><span>Backup</span></button>
       </div>
     </header>
@@ -743,7 +762,7 @@
           </div>
           <div class="tabela-wrap">
             <table>
-              <thead><tr><th>Código</th><th>Razão Social</th><th>CNPJ</th><th>Responsável</th><th>Obrigações dispensadas</th><th class="acoes-col"></th></tr></thead>
+              <thead><tr><th>Código</th><th>Razão Social</th><th>CNPJ</th><th>Responsável</th><th>Início das<br>responsabilidades</th><th>Obrigações dispensadas</th><th class="acoes-col"></th></tr></thead>
               <tbody id="corpoEmpresas"></tbody>
             </table>
           </div>
@@ -799,6 +818,7 @@
           <div class="cartao-cab">
             <div><h3 id="tituloFechamento">Fechamento da competência</h3><span class="sub">Marque o quadrado quando entregar · use <b>⊘</b> para dispensar uma obrigação que a empresa não tem</span></div>
           </div>
+          <div id="faixaFechada"></div>
           <div class="filtros-sit filtros" id="filtrosSit"></div>
           <div class="barra-filtros">
             <select id="fObrig" title="Filtrar por obrigação"></select>
@@ -956,6 +976,10 @@
       <div class="campo"><label for="empRazao">Razão Social</label><input type="text" id="empRazao" placeholder="Ex.: Comércio Exemplo Ltda"></div>
       <div class="campo"><label for="empCnpj">CNPJ</label><input type="text" id="empCnpj" placeholder="00.000.000/0000-00" maxlength="18" inputmode="numeric"></div>
       <div class="campo"><label for="empResp">Responsável</label><select id="empResp"></select></div>
+      <div class="campo"><label for="empIniMes">Início das responsabilidades (competência)</label>
+        <div class="linha-campos"><select id="empIniMes"></select><select id="empIniAno"></select></div>
+        <div class="dica">A empresa só entra nos controles a partir desta competência.</div>
+      </div>
       <span class="erro" id="empErro"></span>
     </div>
     <div class="modal-rodape"><button class="btn btn-secundario" data-fechar>Cancelar</button><button class="btn btn-primario" id="empSalvar">Salvar</button></div>
@@ -1096,6 +1120,15 @@
     <div class="modal-cab"><h3 id="impTitulo">Importar planilha</h3><button class="btn-icone" data-fechar title="Fechar"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
     <div class="modal-corpo" id="importResumo"></div>
     <div class="modal-rodape"><button class="btn btn-secundario" data-fechar>Cancelar</button><button class="btn btn-primario" id="importOk">Importar</button></div>
+  </div>
+</div>
+
+<!-- MODAL: FECHAMENTO DA COMPETÊNCIA -->
+<div class="modal-fundo" id="modalFechar">
+  <div class="modal largo">
+    <div class="modal-cab"><h3 id="fechTitulo">Fechar competência</h3><button class="btn-icone" data-fechar title="Fechar"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-corpo" id="fechCorpo"></div>
+    <div class="modal-rodape" id="fechRodape"></div>
   </div>
 </div>
 
@@ -1370,6 +1403,13 @@
     salvar();
   }
   dados.empresas.forEach(function(e){ if (e.escritorio === undefined) e.escritorio = ''; });
+  // v6: início das responsabilidades (competência a partir da qual o DP passou a atender a empresa)
+  if (dados.versao < 6){
+    var dIni = new Date(ANO, MES - 1, 1), compIni = dIni.getFullYear() + '-' + dois(dIni.getMonth() + 1);
+    dados.empresas.forEach(function(e){ if (!e.inicio) e.inicio = compIni; });
+    dados.versao = 6;
+    salvar();
+  }
   }
   function empresaPorCodigo(cod){ for (var i=0;i<dados.empresas.length;i++) if (dados.empresas[i].codigo === cod) return dados.empresas[i]; return null; }
   function normalizar(t){ return String(t == null ? '' : t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
@@ -1404,6 +1444,12 @@
     return ' class="linha-resp' + (extra ? ' ' + extra : '') + '" style="--cor-resp:' + c + ';--cor-resp-fundo:' + rgba(c, .09) + '"';
   }
   function ehProlabore(emp){ return !!(emp.folha && emp.folha.tipo === 'prolabore'); }
+  // Início das responsabilidades: 'AAAA-MM' (competência). Antes dele a empresa não entra nos controles.
+  function iniciouEm(emp, chave){ return !emp.inicio || (chave || COMP_CHAVE) >= emp.inicio; }
+  function textoInicio(emp){
+    if (!emp.inicio) return '—';
+    var p = emp.inicio.split('-'); return MESES_ABREV[+p[1] - 1].charAt(0).toUpperCase() + MESES_ABREV[+p[1] - 1].slice(1) + '/' + p[0];
+  }
 
   /* ---------- Escritórios contábeis: carteira ativa (escopo) ---------- */
   var IC_PREDIO = '<svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 21v-4h6v4"/><path d="M8 7h2M14 7h2M8 11h2M14 11h2"/></svg>';
@@ -1419,6 +1465,7 @@
     return emp.escritorio === escritorioAtivo;
   }
   function empresasEscopo(){ return dados.empresas.filter(emEscopo); }
+  function empresasDaComp(){ return empresasEscopo().filter(function(e){ return iniciouEm(e); }); }
   function solEmEscopo(x){ return escritorioAtivo === 'todos' || emEscopo(empresa(x.empresa)); }
   function nomeEscopo(){
     if (escritorioAtivo === 'todos') return '';
@@ -1502,6 +1549,7 @@
 
   // Situação de uma célula: 'na' (não se aplica), 'dispensada' ou um status de prazo
   function situacao(emp, ob){
+    if (!iniciouEm(emp)) return { tipo:'na', motivo:'antes' };
     if (ob.id === 'fgts13' && !temFgts13(emp)) return { tipo:'na' };
     if (ob.id === 'adiant' && !(emp.folha && emp.folha.adiantamento)) return { tipo:'na' };
     if ((ob.id === 'fgts' || ob.id === 'fgts13') && ehProlabore(emp)) return { tipo:'dispensada', motivo:'prolabore' };
@@ -1645,13 +1693,13 @@
   function renderEmpresas(){
     var lista = empresasEscopo(), n = lista.length;
     document.getElementById('totalEmpresas').textContent = n + (n === 1 ? ' empresa cadastrada' : ' empresas cadastradas') + (nomeEscopo() ? ' · ' + nomeEscopo() : (dados.escritorios.length ? ' · ' + dados.escritorios.length + ' escritórios' : ''));
-    if (!n){ document.getElementById('corpoEmpresas').innerHTML = '<tr><td colspan="6" class="vazio-lista">Nenhuma empresa cadastrada' + (nomeEscopo() ? ' em ' + esc(nomeEscopo()) : '') + '.</td></tr>'; return; }
-    document.getElementById('corpoEmpresas').innerHTML = linhasAgrupadas(lista, 6, function(emp){
+    if (!n){ document.getElementById('corpoEmpresas').innerHTML = '<tr><td colspan="7" class="vazio-lista">Nenhuma empresa cadastrada' + (nomeEscopo() ? ' em ' + esc(nomeEscopo()) : '') + '.</td></tr>'; return; }
+    document.getElementById('corpoEmpresas').innerHTML = linhasAgrupadas(lista, 7, function(emp){
       var disp = (ehProlabore(emp) ? '<span class="tag">FGTS Digital (só pró-labore)</span>' : '') +
         (emp.dispensadas || []).map(function(id){ return '<span class="tag">' + esc(nomeObrig(id)) + '</span>'; }).join('') || '<span class="sem-resp">—</span>';
       return '<tr' + attrLinha(emp) + '><td><span class="codigo">' + esc(emp.codigo) + '</span></td>' +
         '<td class="razao">' + esc(emp.razao) + '</td><td class="mono">' + esc(emp.cnpj) + '</td>' +
-        '<td>' + chipResp(emp.responsavel) + '</td><td>' + disp + '</td>' +
+        '<td>' + chipResp(emp.responsavel) + '</td><td style="white-space:nowrap">' + textoInicio(emp) + (iniciouEm(emp) ? '' : '<span class="txt-sec">ainda não iniciada</span>') + '</td><td>' + disp + '</td>' +
         '<td class="acoes-col"><button class="btn-icone" data-acao="editar" data-cod="' + esc(emp.codigo) + '" title="Editar">' + IC_EDITAR + '</button>' +
         '<button class="btn-icone perigo" data-acao="excluir" data-cod="' + esc(emp.codigo) + '" title="Excluir">' + IC_EXCLUIR + '</button></td></tr>';
     });
@@ -1693,6 +1741,13 @@
     document.getElementById('empCnpj').value = e ? e.cnpj : '';
     document.getElementById('empResp').innerHTML = opcoesResp(e ? e.responsavel : '');
     document.getElementById('empEscritorio').innerHTML = '<option value="">— Sem escritório —</option>' + dados.escritorios.map(function(x){ return '<option value="' + x.id + '">' + esc(x.nome) + '</option>'; }).join('');
+    var anos = [], aIni = Math.min(2015, e && e.inicio ? +e.inicio.slice(0, 4) : 2015);
+    for (var an = ANO + 1; an >= aIni; an--) anos.push(an);
+    document.getElementById('empIniMes').innerHTML = MESES.map(function(m, i){ return '<option value="' + dois(i + 1) + '">' + m + '</option>'; }).join('');
+    document.getElementById('empIniAno').innerHTML = anos.map(function(a){ return '<option value="' + a + '">' + a + '</option>'; }).join('');
+    var pIni = (e && e.inicio ? e.inicio : padraoInicio()).split('-');
+    document.getElementById('empIniMes').value = pIni[1];
+    document.getElementById('empIniAno').value = pIni[0];
     document.getElementById('empEscritorio').value = e ? (escDe(e) ? e.escritorio : '') :
       (escritorio(escritorioAtivo) ? escritorioAtivo : (dados.escritorios.length === 1 ? dados.escritorios[0].id : ''));
     document.getElementById('empErro').style.display = 'none';
@@ -1720,13 +1775,14 @@
   });
   function gravarEmpresa(cod, razao, cnpj, resp){
     var escSel = document.getElementById('empEscritorio').value;
+    var iniSel = document.getElementById('empIniAno').value + '-' + document.getElementById('empIniMes').value;
     if (empEditando){
       var e = empresa(empEditando);
       if (cod !== empEditando) renomearCodigo(empEditando, cod);
-      e.codigo = cod; e.razao = razao; e.cnpj = cnpj; e.responsavel = resp; e.escritorio = escSel;
+      e.codigo = cod; e.razao = razao; e.cnpj = cnpj; e.responsavel = resp; e.escritorio = escSel; e.inicio = iniSel;
       aviso('Empresa atualizada');
     } else {
-      dados.empresas.push({ codigo:cod, razao:razao, cnpj:cnpj, responsavel:resp, escritorio:escSel, dispensadas:[], folha:folhaPadrao() });
+      dados.empresas.push({ codigo:cod, razao:razao, cnpj:cnpj, responsavel:resp, escritorio:escSel, inicio:iniSel, dispensadas:[], folha:folhaPadrao() });
       aviso('Empresa ' + cod + ' cadastrada');
     }
     salvar(); fecharModal('modalEmpresa'); renderTudo();
@@ -1863,6 +1919,11 @@
   }
 
   function renderObrigacoes(){
+    var fch = fechamentoDe(COMP_CHAVE);
+    document.getElementById('corpoObrigacoes').closest('table').classList.toggle('travada', !!fch);
+    document.getElementById('faixaFechada').innerHTML = fch ? '<div class="faixa-fechada"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><div><b>Competência ' + MESES[COMP_MES] + '/' + COMP_ANO + ' fechada</b> em ' + dataCompleta(deIso(fch.em)) + ' — somente consulta.' +
+      (fch.resumo && fch.resumo.pendentes ? ' Fechada com ' + fch.resumo.pendentes + ' pendência(s).' : ' Tudo entregue.') + (fch.obs ? '<br><i>' + esc(fch.obs) + '</i>' : '') + '</div>' +
+      '<button class="btn btn-secundario" id="btnReabrirFaixa">Reabrir</button></div>' : '';
     var cols = colunasDoMes(empresasEscopo());
     document.getElementById('tituloFechamento').textContent = 'Fechamento da competência ' + MESES[COMP_MES] + '/' + COMP_ANO;
 
@@ -1875,7 +1936,8 @@
     document.getElementById('fResp').value = filtroObrig.resp;
 
     var visiveis = filtroObrig.ob === 'todas' ? cols : cols.filter(function(c){ return c.id === filtroObrig.ob; });
-    var empresasFiltradas = empresasEscopo().filter(empresaPassaFiltro);
+    var empresasFiltradas = empresasDaComp().filter(empresaPassaFiltro);
+    var naoIniciadas = empresasEscopo().length - empresasDaComp().length;
 
     // contadores por situação
     var cont = {};
@@ -1901,8 +1963,15 @@
     var ativo = filtroObrig.sit !== 'todas' || filtroObrig.ob !== 'todas' || filtroObrig.resp !== 'todos' || !!filtroObrig.busca;
     document.getElementById('fLimpar').style.display = ativo ? 'inline-flex' : 'none';
 
-    var totalEscopo = empresasEscopo().length;
-    if (!totalEscopo){ document.getElementById('corpoObrigacoes').innerHTML = '<tr><td colspan="' + (visiveis.length+2) + '" class="vazio-lista">Nenhuma empresa ' + (nomeEscopo() ? 'em ' + esc(nomeEscopo()) : 'cadastrada') + '. Cadastre em Clientes.</td></tr>'; document.getElementById('fResumo').textContent = ''; return; }
+    var totalEscopo = empresasDaComp().length;
+    if (!totalEscopo){
+      var msgVazio = naoIniciadas
+        ? 'Nenhuma empresa com responsabilidades iniciadas na competência ' + MESES[COMP_MES] + '/' + COMP_ANO + '. Veja o início de cada empresa em Clientes.'
+        : 'Nenhuma empresa ' + (nomeEscopo() ? 'em ' + esc(nomeEscopo()) : 'cadastrada') + '. Cadastre em Clientes.';
+      document.getElementById('corpoObrigacoes').innerHTML = '<tr><td colspan="' + (visiveis.length+2) + '" class="vazio-lista">' + msgVazio + '</td></tr>';
+      document.getElementById('fResumo').textContent = naoIniciadas ? naoIniciadas + (naoIniciadas === 1 ? ' empresa com início posterior' : ' empresas com início posterior') : '';
+      return;
+    }
 
     var nLinhas = 0;
     var html = linhasAgrupadas(empresasFiltradas, visiveis.length + 2, function(emp){
@@ -1936,7 +2005,7 @@
       return emps.length + (emps.length === 1 ? ' empresa' : ' empresas') + ' · ' + f + ' de ' + a + ' entregues' + (v ? ' · <b style="color:var(--vermelho)">' + v + ' atrasada(s)</b>' : '');
     });
     document.getElementById('corpoObrigacoes').innerHTML = html || '<tr><td colspan="' + (visiveis.length+2) + '" class="vazio-lista">Nenhuma empresa corresponde aos filtros escolhidos.</td></tr>';
-    document.getElementById('fResumo').textContent = ativo ? 'Mostrando ' + nLinhas + ' de ' + totalEscopo + ' empresas' + (filtroObrig.sit !== 'todas' ? ' · ' + cont[filtroObrig.sit] + ' itens' : '') : totalEscopo + ' empresas';
+    document.getElementById('fResumo').textContent = (naoIniciadas ? naoIniciadas + (naoIniciadas === 1 ? ' empresa com início posterior · ' : ' empresas com início posterior · ') : '') + (ativo ? 'Mostrando ' + nLinhas + ' de ' + totalEscopo + ' empresas' + (filtroObrig.sit !== 'todas' ? ' · ' + cont[filtroObrig.sit] + ' itens' : '') : totalEscopo + ' empresas');
 
     var leg = '<span><i class="ponto" style="background:var(--verde)"></i>Concluído</span>' +
       '<span><i class="ponto" style="background:var(--vermelho)"></i>Atrasado</span>' +
@@ -1964,6 +2033,7 @@
     var b = e.target.closest('[data-acao]'); if (!b) return;
     var cod = b.getAttribute('data-emp'), obId = b.getAttribute('data-obrig'), acao = b.getAttribute('data-acao');
     var emp = empresa(cod); if (!emp) return;
+    if (fechamentoDe(COMP_CHAVE)){ aviso('Competência fechada — reabra-a para alterar'); return; }
     if (acao === 'marcar'){
       var s = statusMes(); if (!s[cod]) s[cod] = {};
       if (s[cod][obId]){ delete s[cod][obId]; definirEnvio(cod, obId, null); }
@@ -2026,7 +2096,7 @@
 
     if (!empresasEscopo().length){ document.getElementById('corpoDecimo').innerHTML = '<tr><td colspan="4" class="vazio-lista">Nenhuma empresa ' + (nomeEscopo() ? 'em ' + esc(nomeEscopo()) : 'cadastrada') + '.</td></tr>'; return; }
 
-    document.getElementById('corpoDecimo').innerHTML = linhasAgrupadas(empresasEscopo(), 4, function(emp){
+    document.getElementById('corpoDecimo').innerHTML = linhasAgrupadas(empresasEscopo().filter(function(e){ return iniciouEm(e, COMP_ANO + '-12'); }), 4, function(emp){
       var d = decimoDe(emp.codigo, COMP_ANO);
       function celula(p, venc){
         var info = d[p] || {};
@@ -2653,7 +2723,7 @@
     dados.equipe.forEach(function(m){ P(m.id); });
     var dem = { adm:0, des:0, fer:0, outra:0, admC:0, desC:0, ferC:0, outraC:0, solAtras:0, tarTot:0, tarConc:0 };
 
-    var emps = empresasEscopo().map(function(emp){
+    var emps = empresasDaComp().map(function(emp){
       var r = { emp:emp, ativas:0, entregues:0, noPrazo:0, comAtraso:0, vencidas:0, sol:0, solPts:0, tar:0, pontos:0, evol:[] };
       P(emp.responsavel).empresas++;
       cols.forEach(function(ob){
@@ -2748,7 +2818,8 @@
           '<td>' + barraPct(a.pt, tot) + '</td></tr>';
       }).join('') || '<tr><td colspan="8" class="vazio-lista">Sem empresas neste escritório.</td></tr>';
     }
-    document.getElementById('relSub').textContent = 'Trabalhos realizados em ' + MESES[R.mt.getMonth()].toLowerCase() + '/' + R.mt.getFullYear() + ' · posição em ' + dataCompleta(HOJE) + ' · troque a competência no cabeçalho';
+    var fchR = fechamentoDe(COMP_CHAVE);
+    document.getElementById('relSub').textContent = (fchR ? 'Competência fechada em ' + dataCompleta(deIso(fchR.em)) + ' · ' : 'Competência em aberto · ') + 'Trabalhos realizados em ' + MESES[R.mt.getMonth()].toLowerCase() + '/' + R.mt.getFullYear() + ' · posição em ' + dataCompleta(HOJE) + ' · troque a competência no cabeçalho';
 
     var t = { obrig:0, entregues:0, noPrazo:0, comAtraso:0, vencidas:0, solTot:0, solConc:0 };
     R.prof.forEach(function(p){ Object.keys(t).forEach(function(k){ t[k] += p[k]; }); });
@@ -2820,7 +2891,112 @@
   /* =========================================================
      SELETOR DE COMPETÊNCIA (cabeçalho)
      ========================================================= */
-  function competenciaAtualPadrao(){ var d = new Date(ANO, MES - 1, 1); return { a:d.getFullYear(), m:d.getMonth() }; }
+  // Competência de trabalho: a do mês anterior a hoje; se já estiver fechada, a próxima em aberto
+  function competenciaAtualPadrao(){
+    var d = new Date(ANO, MES - 1, 1);
+    for (var i = 0; i < 36 && fechamentoDe(d.getFullYear() + '-' + dois(d.getMonth() + 1)); i++) d = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+    return { a:d.getFullYear(), m:d.getMonth() };
+  }
+
+  /* =========================================================
+     FECHAMENTO DA COMPETÊNCIA
+     ========================================================= */
+  function fechamentoDe(chave){ return (dados.fechamentos && dados.fechamentos[chave]) || null; }
+  function nomeComp(a, m){ var d = new Date(a, m, 1); return MESES[d.getMonth()] + '/' + d.getFullYear(); }
+  // Situação da competência selecionada (todas as empresas e escritórios — o fechamento é do escritório de DP inteiro)
+  function diagnosticoCompetencia(){
+    var r = { total:0, entregues:0, pendentes:[], semEnvio:[], dispensadas:0, empresas:0 };
+    var cols = colunasDoMes();
+    dados.empresas.forEach(function(emp){
+      if (!iniciouEm(emp)) return;
+      r.empresas++;
+      cols.forEach(function(ob){
+        var st = situacao(emp, ob);
+        if (st.tipo === 'dispensada') r.dispensadas++;
+        if (st.tipo !== 'ativa') return;
+        r.total++;
+        if (st.feito){ r.entregues++; if (!envioDe(emp.codigo, ob.id)) r.semEnvio.push({ emp:emp, ob:ob }); }
+        else r.pendentes.push({ emp:emp, ob:ob, st:st.st });
+      });
+    });
+    return r;
+  }
+  function listaPendencias(itens, comStatus){
+    var porEmp = {};
+    itens.forEach(function(i){ (porEmp[i.emp.codigo] = porEmp[i.emp.codigo] || { emp:i.emp, itens:[] }).itens.push(i); });
+    return '<div class="imp-lista">' + Object.keys(porEmp).map(function(k){
+      var g = porEmp[k], e = escDe(g.emp);
+      return '<div><b>' + esc(g.emp.codigo) + '</b> ' + esc(g.emp.razao) + (e ? ' <span style="color:var(--cinza)">· ' + esc(e.nome) + '</span>' : '') + '<br>' +
+        g.itens.map(function(i){ return comStatus ? esc(i.ob.nome) + ' (' + esc(i.st.txt.toLowerCase()) + ')' : esc(i.ob.nome); }).join(' · ') + '</div>';
+    }).join('') + '</div>';
+  }
+  function abrirFechamento(){
+    var fch = fechamentoDe(COMP_CHAVE), nome = nomeComp(COMP_ANO, COMP_MES), prox = nomeComp(COMP_ANO, COMP_MES + 1);
+    var corpo = document.getElementById('fechCorpo'), rod = document.getElementById('fechRodape');
+    if (fch){
+      var rs = fch.resumo || {};
+      document.getElementById('fechTitulo').textContent = 'Competência ' + nome + ' — fechada';
+      corpo.innerHTML = '<div class="fech-ok"><b>Fechada em ' + dataCompleta(deIso(fch.em)) + (fch.hora ? ' às ' + fch.hora : '') + '.</b> As marcações desta competência estão travadas para consulta.</div>' +
+        '<div class="imp-stats"><div class="imp-stat"><b>' + (rs.empresas || 0) + '</b><span>empresas</span></div><div class="imp-stat"><b>' + (rs.entregues || 0) + '/' + (rs.total || 0) + '</b><span>obrigações entregues</span></div>' +
+        '<div class="imp-stat"><b>' + (rs.pendentes || 0) + '</b><span>pendências no fechamento</span></div><div class="imp-stat"><b>' + (rs.semEnvio || 0) + '</b><span>sem envio validado</span></div></div>' +
+        (fch.obs ? '<div><div class="imp-titulo">Observação do fechamento</div><p class="dica-txt" style="color:var(--preto)">' + esc(fch.obs) + '</p></div>' : '') +
+        '<p class="dica-txt">Precisa corrigir algo? Reabra a competência, faça o ajuste e feche de novo.</p>';
+      rod.innerHTML = '<button class="btn btn-secundario" data-fechar>Fechar janela</button><button class="btn btn-perigo-cheio" id="fechReabrir">Reabrir competência</button>';
+      abrirModal('modalFechar', null);
+      return;
+    }
+    var dg = diagnosticoCompetencia(), np = dg.pendentes.length;
+    var antA = COMP_ANO, antM = COMP_MES - 1, antChave = comCompetencia(antA, antM, function(){ return COMP_CHAVE; });
+    var antAberta = !fechamentoDe(antChave) && comCompetencia(antA, antM, function(){ return dados.empresas.some(function(e){ return iniciouEm(e); }); });
+    document.getElementById('fechTitulo').textContent = 'Fechar competência ' + nome;
+    corpo.innerHTML =
+      '<div class="imp-stats"><div class="imp-stat"><b>' + dg.empresas + '</b><span>empresas na competência</span></div>' +
+      '<div class="imp-stat"><b>' + dg.entregues + '/' + dg.total + '</b><span>obrigações entregues</span></div>' +
+      '<div class="imp-stat"><b' + (np ? ' style="color:var(--vermelho)"' : '') + '>' + np + '</b><span>pendentes</span></div>' +
+      '<div class="imp-stat"><b' + (dg.semEnvio.length ? ' style="color:var(--ambar-texto)"' : '') + '>' + dg.semEnvio.length + '</b><span>entregues sem envio validado</span></div></div>' +
+      (antAberta ? '<div class="fech-aviso">A competência anterior (' + nomeComp(antA, antM) + ') ainda não foi fechada.</div>' : '') +
+      (np ? '<div class="fech-alerta"><b>Ainda há ' + np + ' obrigação(ões) pendente(s).</b> Se fechar agora, elas ficam registradas como não entregues nesta competência e a tela fica travada.</div>' +
+            '<div><div class="imp-titulo">Pendências</div>' + listaPendencias(dg.pendentes, true) + '</div>'
+          : '<div class="fech-ok"><b>Tudo entregue!</b> Todas as obrigações da competência foram concluídas.</div>') +
+      (dg.semEnvio.length ? '<div><div class="imp-titulo">Entregues sem envio validado ao cliente</div>' + listaPendencias(dg.semEnvio, false) + '</div>' : '') +
+      '<div class="campo"><label for="fechObs">Observação do fechamento <span style="font-weight:400;color:var(--cinza)">(opcional)</span></label><textarea id="fechObs" placeholder="Ex.: DCTFWeb da EMP003 aguardando retificação do cliente"></textarea></div>' +
+      (np ? '<label class="campo-check alerta"><input type="checkbox" id="fechCiente"><div><b>Estou ciente das pendências e quero fechar assim mesmo</b><span>Você poderá reabrir a competência depois, se precisar.</span></div></label>' : '');
+    rod.innerHTML = '<button class="btn btn-secundario" data-fechar>Cancelar</button><button class="btn btn-primario" id="fechConfirmar"' + (np ? ' disabled' : '') + '>' +
+      '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Fechar e iniciar ' + prox + '</button>';
+    var ciente = document.getElementById('fechCiente');
+    if (ciente) ciente.addEventListener('change', function(){ document.getElementById('fechConfirmar').disabled = !this.checked; });
+    abrirModal('modalFechar', np ? 'fechObs' : 'fechConfirmar');
+  }
+  document.getElementById('fechRodape').addEventListener('click', function(e){
+    if (e.target.closest('#fechConfirmar')){
+      var btn = document.getElementById('fechConfirmar'); if (btn.disabled) return;
+      var dg = diagnosticoCompetencia(), agora = new Date(), nome = nomeComp(COMP_ANO, COMP_MES);
+      if (!dados.fechamentos) dados.fechamentos = {};
+      dados.fechamentos[COMP_CHAVE] = {
+        em:isoData(HOJE), hora:dois(agora.getHours()) + ':' + dois(agora.getMinutes()),
+        obs:(document.getElementById('fechObs').value || '').trim(),
+        resumo:{ empresas:dg.empresas, total:dg.total, entregues:dg.entregues, pendentes:dg.pendentes.length, semEnvio:dg.semEnvio.length },
+        pendencias:dg.pendentes.map(function(i){ return { empresa:i.emp.codigo, obrigacao:i.ob.id }; })
+      };
+      salvar();
+      fecharModal('modalFechar');
+      definirCompetencia(COMP_ANO, COMP_MES + 1);
+      filtroObrig = { sit:'todas', ob:'todas', resp:'todos', busca:'' };
+      document.getElementById('fBusca').value = '';
+      renderTudo();
+      aviso('Competência ' + nome + ' fechada. Iniciada a competência ' + nomeComp(COMP_ANO, COMP_MES) + '.');
+    } else if (e.target.closest('#fechReabrir')){
+      fecharModal('modalFechar'); pedirReabertura();
+    }
+  });
+  function pedirReabertura(){
+    var nome = nomeComp(COMP_ANO, COMP_MES), chave = COMP_CHAVE;
+    confirmar({ titulo:'Reabrir competência', ok:'Reabrir', perigo:true,
+      texto:'Reabrir a competência ' + nome + '?\n\nAs marcações voltam a poder ser alteradas. Nada do que foi registrado é apagado.',
+      acao:function(){ delete dados.fechamentos[chave]; salvar(); renderTudo(); aviso('Competência ' + nome + ' reaberta'); } });
+  }
+  document.getElementById('btnFechar').addEventListener('click', abrirFechamento);
+  document.getElementById('faixaFechada').addEventListener('click', function(e){ if (e.target.closest('#btnReabrirFaixa')) pedirReabertura(); });
   function renderCompetencia(){
     var v = new Date(COMP_ANO, COMP_MES + 1, 1), p = competenciaAtualPadrao();
     var ehAtual = p.a === COMP_ANO && p.m === COMP_MES;
@@ -2828,6 +3004,13 @@
     document.getElementById('compVenc').textContent = 'vencimentos em ' + MESES_ABREV[v.getMonth()] + '/' + v.getFullYear();
     document.getElementById('seletorComp').classList.toggle('fora-atual', !ehAtual);
     document.getElementById('compRotulo').title = ehAtual ? 'Competência atual (fechamento em andamento)' : 'Clique para voltar à competência atual: ' + MESES[p.m] + '/' + p.a;
+    var fch = fechamentoDe(COMP_CHAVE);
+    document.getElementById('seletorComp').classList.toggle('fechada', !!fch);
+    document.getElementById('compEstado').textContent = fch ? 'Fechada' : 'Competência';
+    var bf = document.getElementById('btnFechar');
+    bf.classList.toggle('fechada', !!fch);
+    document.getElementById('btnFecharTxt').textContent = fch ? 'Competência fechada' : 'Fechar competência';
+    bf.title = fch ? 'Fechada em ' + dataCompleta(deIso(fch.em)) + ' — clique para ver o resumo ou reabrir' : 'Conferir pendências e fechar ' + MESES[COMP_MES] + '/' + COMP_ANO;
   }
   document.getElementById('compAnt').addEventListener('click', function(){ definirCompetencia(COMP_ANO, COMP_MES - 1); renderTudo(); });
   document.getElementById('compProx').addEventListener('click', function(){ definirCompetencia(COMP_ANO, COMP_MES + 1); renderTudo(); });
@@ -2964,6 +3147,7 @@
     sindicato:['sindicato'], dataBase:['databasemes','database','databasemesdoreajuste','mesdedatabase'],
     adiantamento:['adiantamentosimnao','adiantamento','temadiantamento'], percAdiant:['percentualdoadiantamento','percentualadiantamento','percentual'],
     diaAdiant:['diadoadiantamento','diaadiantamento'], tipo:['tipodefolha','tipofolha','folha'],
+    inicio:['iniciodasresponsabilidades','iniciomesano','inicio','iniciodoatendimento','competenciainicial','iniciodasresponsabilidadesmesano'],
     rpa:['rpasimnao','rpa','temrpa'], rpaObs:['observacaodorpa','observacaorpa','obsrpa'], entrega:['mododeentrega','modosdeentrega','entrega'],
     escritorio:['escritorio','escritoriocontabil','contabilidade','nomedoescritorio']
   };
@@ -3025,6 +3209,19 @@
       linhas.push(o);
     }
     return linhas;
+  }
+  function padraoInicio(){ var d = new Date(ANO, MES - 1, 1); return d.getFullYear() + '-' + dois(d.getMonth() + 1); }
+  // Aceita 10/2026, 01/10/2026, out/2026, Outubro/2026, 2026-10 ou data do Excel → 'AAAA-MM'
+  function inicioDe(v){
+    var t = String(v).trim(), m;
+    if (/^\d{5}(\.\d+)?$/.test(t)){ var dx = new Date(Date.UTC(1899, 11, 30) + Math.round(+t) * 86400000); return dx.getUTCFullYear() + '-' + dois(dx.getUTCMonth() + 1); }
+    if ((m = /^(\d{4})-(\d{1,2})/.exec(t))) return +m[2] >= 1 && +m[2] <= 12 ? m[1] + '-' + dois(+m[2]) : null;
+    if ((m = /^(?:\d{1,2}[\/.-])?(\d{1,2})[\/.-](\d{2,4})$/.exec(t))){ var a = +m[2]; if (a < 100) a += 2000; return +m[1] >= 1 && +m[1] <= 12 ? a + '-' + dois(+m[1]) : null; }
+    if ((m = /^([a-zçA-ZÇ]+)[\s\/.-]*(?:de\s+)?(\d{2,4})$/i.exec(normalizar(t)))){
+      var idx = MESES.map(function(x){ return normalizar(x).slice(0, 3); }).indexOf(m[1].slice(0, 3)), an = +m[2]; if (an < 100) an += 2000;
+      return idx >= 0 ? an + '-' + dois(idx + 1) : null;
+    }
+    return null;
   }
   function simNao(v){ return ['sim','s','x','true','1','verdadeiro','yes'].indexOf(normalizar(v)) !== -1; }
   function mesDe(v){
@@ -3097,7 +3294,7 @@
         if (achado) respRef = { id:achado.id };
         else { var ch = normalizar(l.responsavel); if (!novosResp[ch]) novosResp[ch] = { chave:ch, nome:l.responsavel, funcao:l.funcao || '' }; respRef = { novo:ch }; }
       }
-      var c = {};
+      var c = {}, item0 = {};
       if (l.sindicato) c.sindicato = l.sindicato;
       if (l.dataBase !== undefined && l.dataBase !== ''){ var db = mesDe(l.dataBase); if (db === null) plano.avisos.push(ident + ': data-base "' + l.dataBase + '" não reconhecida — ignorada'); else c.dataBase = db; }
       if (l.adiantamento) c.adiantamento = simNao(l.adiantamento);
@@ -3106,6 +3303,7 @@
       if (l.tipo) c.tipo = normalizar(l.tipo).indexOf('pro') !== -1 ? 'prolabore' : 'empregados';
       if (l.rpa) c.rpa = simNao(l.rpa);
       if (l.rpaObs) c.rpaObs = l.rpaObs;
+      if (l.inicio){ var ini = inicioDe(l.inicio); if (ini === null) plano.avisos.push(ident + ': início "' + l.inicio + '" não reconhecido — use mês/ano, ex.: 10/2026'); else item0.inicio = ini; }
       if (l.entrega) c.entrega = l.entrega.split(/[,;\/]+/).map(function(x){ return x.trim(); }).filter(Boolean);
       if (c.adiantamento && c.percAdiant === undefined && !(existente && existente.folha.percAdiant)) plano.avisos.push(ident + ': adiantamento marcado sem percentual — informe depois em Folha de Pagamento');
       var escRef;
@@ -3118,7 +3316,7 @@
         }
         escRef = escMapa[ke];
       } else if (!existente && (dados.escritorios.length || plano.novosEsc.length)) plano.avisos.push(ident + ': sem escritório informado — ficará como "Sem escritório"');
-      var item = { linha:n, cod:cod, razao:razao, cnpj:cnpj, respRef:respRef, respNome:l.responsavel || '', escRef:escRef, escNome:escRef ? escRef.nome : '', campos:c };
+      var item = { linha:n, cod:cod, razao:razao, cnpj:cnpj, respRef:respRef, respNome:l.responsavel || '', escRef:escRef, escNome:escRef ? escRef.nome : '', inicio:item0.inicio, campos:c };
       (existente ? plano.atualizadas : plano.novas).push(item);
     });
     plano.novosResp = Object.keys(novosResp).map(function(k){ return novosResp[k]; });
@@ -3158,13 +3356,14 @@
     }
     plano.novas.forEach(function(it){
       var f = folhaPadrao(); aplicarFolha(f, it.campos);
-      dados.empresas.push({ codigo:it.cod, razao:it.razao, cnpj:it.cnpj, responsavel:idResp(it.respRef) || '', escritorio:idEsc(it.escRef) || '', dispensadas:[], folha:f });
+      dados.empresas.push({ codigo:it.cod, razao:it.razao, cnpj:it.cnpj, responsavel:idResp(it.respRef) || '', escritorio:idEsc(it.escRef) || '', inicio:it.inicio || padraoInicio(), dispensadas:[], folha:f });
     });
     plano.atualizadas.forEach(function(it){
       var e = empresa(it.cod);
       e.razao = it.razao; e.cnpj = it.cnpj;
       var r = idResp(it.respRef); if (r !== undefined) e.responsavel = r;
       var es = idEsc(it.escRef); if (es !== undefined) e.escritorio = es;
+      if (it.inicio) e.inicio = it.inicio;
       if (!e.folha) e.folha = folhaPadrao();
       aplicarFolha(e.folha, it.campos);
     });
@@ -3178,7 +3377,7 @@
     var lista = function(titulo, itens, cls){
       return itens.length ? '<div><div class="imp-titulo">' + titulo + '</div><div class="imp-lista ' + (cls || '') + '">' + itens.map(function(t){ return '<div>' + t + '</div>'; }).join('') + '</div></div>' : '';
     };
-    var desc = function(it){ return '<b>' + esc(it.cod) + '</b> — ' + esc(it.razao) + (it.escNome ? ' · <span style="color:var(--teal)">' + esc(it.escNome) + '</span>' : '') + (it.respNome ? ' · ' + esc(it.respNome) : ''); };
+    var desc = function(it){ return '<b>' + esc(it.cod) + '</b> — ' + esc(it.razao) + (it.inicio ? ' · início ' + textoInicio({ inicio:it.inicio }) : '') + (it.escNome ? ' · <span style="color:var(--teal)">' + esc(it.escNome) + '</span>' : '') + (it.respNome ? ' · ' + esc(it.respNome) : ''); };
     var descEsc = function(x){ var c = x.campos; return '<b>' + esc(c.nome || x.nome) + '</b>' + [c.contato, c.telefone, c.email].filter(Boolean).map(function(v){ return ' · ' + esc(v); }).join(''); };
     document.getElementById('importResumo').innerHTML =
       '<div class="imp-stats"><div class="imp-stat"><b>' + plano.novosEsc.length + '</b><span>escritórios novos</span></div>' +
@@ -3269,6 +3468,8 @@
   var th = HOJE.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long' });
   document.getElementById('topoHoje').textContent = 'Hoje: ' + th.charAt(0).toUpperCase() + th.slice(1);
   document.getElementById('descricaoSecao').textContent = secoes.painel.descricao;
+  if (!dados.fechamentos) dados.fechamentos = {};
+  (function(){ var cp = competenciaAtualPadrao(); definirCompetencia(cp.a, cp.m); })();
   renderTudo();
 })();
 </script>
