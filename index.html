@@ -204,6 +204,7 @@
   .st.ambar{background:var(--ambar-claro);color:var(--ambar-texto)}
   .st.neutro{background:var(--cinza-claro);color:var(--cinza);border:1px solid var(--bege)}
   .st.dispensada{background:var(--bege);color:var(--cinza)}
+  .tag.off{background:var(--terracota-claro);color:var(--terracota)}
   td.cel.dispensada{background:repeating-linear-gradient(45deg,#FAF9F5,#FAF9F5 6px,#F2F0E8 6px,#F2F0E8 12px)}
   .link-mini{background:none;border:none;color:var(--teal);font-size:11.5px;font-weight:600;text-decoration:underline;margin-top:4px;display:block;margin-left:auto;margin-right:auto}
   .nao-aplica{color:#B5B1A3;font-size:12px}
@@ -457,6 +458,35 @@
   .faixa-lote svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
   .faixa-lote .btn{margin-left:auto}
   .conf-texto .campo-check{margin-top:12px;white-space:normal}
+  /* Matriz de obrigações por empresa */
+  .sw{width:40px;height:22px;border-radius:12px;background:#CFCBBE;border:none;position:relative;transition:background .15s;flex-shrink:0;vertical-align:middle}
+  .sw::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:left .15s}
+  .sw.on{background:var(--verde)}
+  .sw.on::after{left:21px}
+  .sw:hover{filter:brightness(.95)}
+  .travada-m .sw{pointer-events:none;opacity:.5}
+  .tabela-matriz td.num,.tabela-matriz th.num{white-space:nowrap;text-align:right}
+  .tabela-matriz td.mcel{text-align:center;padding:10px 8px;min-width:104px}
+  .tabela-matriz th.obcol{text-align:center;white-space:normal;vertical-align:bottom;min-width:104px}
+  .tabela-matriz th.obcol button{background:none;border:none;font:inherit;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--teal);cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;line-height:1.3}
+  .tabela-matriz th.obcol button:hover{color:var(--teal-escuro)}
+  .tabela-matriz th.obcol small{display:block;text-transform:none;letter-spacing:0;font-weight:400;font-size:11px;margin-top:3px}
+  .m-sub{display:block;font-size:11px;color:var(--cinza);margin-top:4px;line-height:1.3}
+  .m-sub.off{color:var(--terracota)}
+  .m-fixo{font-size:11.5px;color:var(--cinza);font-style:italic}
+  td.mcel.off{background:repeating-linear-gradient(45deg,#FAF9F5,#FAF9F5 6px,#F2F0E8 6px,#F2F0E8 12px)}
+  .vig{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .vig label{font-size:12.5px;font-weight:600;color:var(--cinza)}
+  .vig select{padding:7px 10px;border:1px solid var(--borda);border-radius:8px;background:var(--branco);font-size:13px;outline:none}
+  .vig select:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-claro)}
+  .vig-aviso{margin:14px 20px 0}
+  .col-lista{border:1px solid var(--bege);border-radius:8px;max-height:360px;overflow-y:auto}
+  .col-lista .grp{padding:7px 12px;background:var(--teal-claro);font-weight:700;font-size:12.5px;color:var(--teal-escuro);position:sticky;top:0}
+  .col-lista label{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--bege);cursor:pointer;font-size:13px}
+  .col-lista label:last-child{border-bottom:none}
+  .col-lista label.fixo{cursor:default;color:var(--cinza)}
+  .col-lista input{width:16px;height:16px;accent-color:var(--verde);flex-shrink:0}
+  .col-lista small{margin-left:auto;color:var(--cinza);font-size:11.5px;white-space:nowrap}
   .faixa-fechada{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 20px 0;padding:12px 14px;border-radius:8px;background:var(--verde-claro);color:#1F5C39;font-size:13px;border:1px solid #BFDCC9}
   .faixa-fechada svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
   .faixa-fechada .btn{margin-left:auto}
@@ -651,6 +681,10 @@
         <svg viewBox="0 0 24 24"><path d="M3 21V7l9-4 9 4v14"/><path d="M9 21v-6h6v6"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>
         Clientes
       </button>
+      <button class="menu-item" data-secao="obrigemp">
+        <svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg>
+        Obrigações por empresa
+      </button>
       <button class="menu-item" data-secao="equipe">
         <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14.5c2.3.3 3.9 2 4.5 4.5"/></svg>
         Equipe
@@ -760,6 +794,25 @@
         </div>
       </section>
 
+      <!-- OBRIGAÇÕES POR EMPRESA -->
+      <section class="secao" id="secao-obrigemp">
+        <div class="cartao">
+          <div class="cartao-cab">
+            <div><h3>Quais obrigações cada empresa tem</h3><span class="sub">Ligue ou desligue cada obrigação. Clique no nome de uma obrigação para apontar, de uma vez, quais empresas a têm.</span></div>
+            <div class="acoes vig"><label for="vigMes">Vale a partir da competência</label><select id="vigMes"></select><select id="vigAno"></select></div>
+          </div>
+          <div id="vigAviso"></div>
+          <div class="tabela-wrap" style="margin-top:12px"><table class="tabela-matriz" id="tabMatriz">
+            <thead id="cabMatriz"></thead>
+            <tbody id="corpoMatriz"></tbody>
+          </table></div>
+          <div class="rel-nota">
+            <b>Como funciona:</b> desligar uma obrigação a <b>desativa a partir da competência escolhida</b> acima — as competências anteriores continuam como estavam, com o histórico preservado. Ligar de novo a reativa a partir da competência escolhida.
+            Adiantamento depende de a empresa ter adiantamento (Folha de Pagamento); FGTS Digital não se aplica a empresas só com pró-labore; FGTS Digital 13º é lançado sozinho quando a 1ª parcela é paga.
+          </div>
+        </div>
+      </section>
+
       <!-- CLIENTES -->
       <section class="secao" id="secao-clientes">
         <div class="cartao">
@@ -769,7 +822,7 @@
           </div>
           <div class="tabela-wrap">
             <table>
-              <thead><tr><th>Código</th><th>Razão Social</th><th>CNPJ</th><th>Responsável</th><th>Início das<br>responsabilidades</th><th>Obrigações dispensadas</th><th class="acoes-col"></th></tr></thead>
+              <thead><tr><th>Código</th><th>Razão Social</th><th>CNPJ</th><th>Responsável</th><th>Início das<br>responsabilidades</th><th>Obrigações que não tem</th><th class="acoes-col"></th></tr></thead>
               <tbody id="corpoEmpresas"></tbody>
             </table>
           </div>
@@ -823,8 +876,8 @@
       <section class="secao" id="secao-obrigacoes">
         <div class="cartao">
           <div class="cartao-cab">
-            <div><h3 id="tituloFechamento">Fechamento da competência</h3><span class="sub">Marque o quadrado quando entregar · use <b>⊘</b> para dispensar uma obrigação que a empresa não tem</span></div>
-            <div class="acoes"><button class="btn btn-lote" id="btnEntregarTodas" title="Marca como entregues, de uma vez, as obrigações pendentes que estão na tela (respeita os filtros)"><svg viewBox="0 0 24 24"><path d="M2 12.5l4.5 4.5L15 8.5"/><path d="M10 15.5l1.5 1.5L21 7.5"/></svg><span id="btnEntregarTxt">Marcar todas como entregues</span></button></div>
+            <div><h3 id="tituloFechamento">Fechamento da competência</h3><span class="sub">Marque o quadrado quando entregar · use <b>⊘</b> para desativar uma obrigação que a empresa não tem</span></div>
+            <div class="acoes"><button class="btn btn-secundario" id="btnConfigObrig" title="Apontar quais obrigações cada empresa tem"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg>Obrigações por empresa</button><button class="btn btn-lote" id="btnEntregarTodas" title="Marca como entregues, de uma vez, as obrigações pendentes que estão na tela (respeita os filtros)"><svg viewBox="0 0 24 24"><path d="M2 12.5l4.5 4.5L15 8.5"/><path d="M10 15.5l1.5 1.5L21 7.5"/></svg><span id="btnEntregarTxt">Marcar todas como entregues</span></button></div>
           </div>
           <div id="faixaFechada"></div>
           <div id="faixaLote"></div>
@@ -1132,6 +1185,19 @@
   </div>
 </div>
 
+<!-- MODAL: QUEM TEM A OBRIGAÇÃO (coluna) -->
+<div class="modal-fundo" id="modalColuna">
+  <div class="modal largo">
+    <div class="modal-cab"><div><h3 id="colTitulo"></h3><span class="sub" id="colSub" style="font-size:12.5px;color:var(--cinza)"></span></div><button class="btn-icone" data-fechar title="Fechar"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-corpo">
+      <div class="botoes"><button class="btn btn-secundario" id="colTodas">Marcar todas</button><button class="btn btn-secundario" id="colNenhuma">Desmarcar todas</button></div>
+      <div class="col-lista" id="colLista"></div>
+      <p class="dica-txt">Marcada = a empresa tem esta obrigação. As mudanças valem a partir da competência indicada acima; as anteriores não mudam.</p>
+    </div>
+    <div class="modal-rodape"><button class="btn btn-secundario" data-fechar>Cancelar</button><button class="btn btn-primario" id="colSalvar">Salvar</button></div>
+  </div>
+</div>
+
 <!-- MODAL: FECHAMENTO DA COMPETÊNCIA -->
 <div class="modal-fundo" id="modalFechar">
   <div class="modal largo">
@@ -1419,6 +1485,18 @@
     dados.versao = 6;
     salvar();
   }
+  // v7: obrigações por empresa com vigência — inativas[obId] = [{ de:'AAAA-MM', ate:'AAAA-MM'|null }]
+  // ('0000-00' = a empresa nunca teve a obrigação). Substitui a lista simples de "dispensadas".
+  if (dados.versao < 7){
+    dados.empresas.forEach(function(e){
+      if (!e.inativas) e.inativas = {};
+      (e.dispensadas || []).forEach(function(id){ e.inativas[id] = [{ de:'0000-00', ate:null }]; });
+      delete e.dispensadas;
+    });
+    dados.versao = 7;
+    salvar();
+  }
+  dados.empresas.forEach(function(e){ if (!e.inativas) e.inativas = {}; });
   }
   function empresaPorCodigo(cod){ for (var i=0;i<dados.empresas.length;i++) if (dados.empresas[i].codigo === cod) return dados.empresas[i]; return null; }
   function normalizar(t){ return String(t == null ? '' : t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
@@ -1455,10 +1533,7 @@
   function ehProlabore(emp){ return !!(emp.folha && emp.folha.tipo === 'prolabore'); }
   // Início das responsabilidades: 'AAAA-MM' (competência). Antes dele a empresa não entra nos controles.
   function iniciouEm(emp, chave){ return !emp.inicio || (chave || COMP_CHAVE) >= emp.inicio; }
-  function textoInicio(emp){
-    if (!emp.inicio) return '—';
-    var p = emp.inicio.split('-'); return MESES_ABREV[+p[1] - 1].charAt(0).toUpperCase() + MESES_ABREV[+p[1] - 1].slice(1) + '/' + p[0];
-  }
+  function textoInicio(emp){ return emp.inicio ? textoComp(emp.inicio) : '—'; }
 
   /* ---------- Escritórios contábeis: carteira ativa (escopo) ---------- */
   var IC_PREDIO = '<svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 21v-4h6v4"/><path d="M8 7h2M14 7h2M8 11h2M14 11h2"/></svg>';
@@ -1473,6 +1548,46 @@
     if (escritorioAtivo === 'sem') return !escDe(emp);
     return emp.escritorio === escritorioAtivo;
   }
+  /* ---------- Obrigações por empresa (períodos de inatividade) ---------- */
+  function textoComp(chave){
+    if (!chave || chave === '0000-00') return '';
+    var p = chave.split('-'), m = MESES_ABREV[+p[1] - 1];
+    return m.charAt(0).toUpperCase() + m.slice(1) + '/' + p[0];
+  }
+  function inativaEm(emp, obId, chave){
+    chave = chave || COMP_CHAVE;
+    var ps = (emp.inativas && emp.inativas[obId]) || [];
+    for (var i = 0; i < ps.length; i++) if (ps[i].de <= chave && (!ps[i].ate || chave < ps[i].ate)) return ps[i];
+    return null;
+  }
+  function desativarObrig(emp, obId, chave){
+    if (inativaEm(emp, obId, chave)) return false;
+    if (!emp.inativas) emp.inativas = {};
+    var ps = (emp.inativas[obId] || []).filter(function(x){ return x.de < chave; });
+    var emenda = ps.filter(function(x){ return x.ate === chave; })[0];
+    if (emenda) emenda.ate = null; else ps.push({ de:chave, ate:null });
+    emp.inativas[obId] = ps;
+    return true;
+  }
+  // Ativa da competência em diante: encerra o período que a cobre e cancela desativações futuras
+  function ativarObrig(emp, obId, chave){
+    if (!emp.inativas || !emp.inativas[obId]) return false;
+    var antes = JSON.stringify(emp.inativas[obId]);
+    var ps = emp.inativas[obId].filter(function(x){ return x.de < chave; });
+    ps.forEach(function(x){ if (!x.ate || x.ate > chave) x.ate = chave; });
+    ps = ps.filter(function(x){ return x.de < x.ate; });
+    if (ps.length) emp.inativas[obId] = ps; else delete emp.inativas[obId];
+    return JSON.stringify(ps) !== antes;
+  }
+  function desativacaoFutura(emp, obId, chave){
+    var ps = (emp.inativas && emp.inativas[obId]) || [], f = null;
+    ps.forEach(function(x){ if (x.de > chave && (!f || x.de < f.de)) f = x; });
+    return f;
+  }
+  function textoInativa(per){ return per.de === '0000-00' ? 'não tem' : 'desde ' + textoComp(per.de); }
+  // Competências fechadas a partir de uma competência (mudanças nelas são bloqueadas)
+  function fechadasDesde(chave){ return Object.keys(dados.fechamentos || {}).filter(function(k){ return k >= chave; }).sort(); }
+
   function empresasEscopo(){ return dados.empresas.filter(emEscopo); }
   function empresasDaComp(){ return empresasEscopo().filter(function(e){ return iniciouEm(e); }); }
   function solEmEscopo(x){ return escritorioAtivo === 'todos' || emEscopo(empresa(x.empresa)); }
@@ -1562,7 +1677,7 @@
     if (ob.id === 'fgts13' && !temFgts13(emp)) return { tipo:'na' };
     if (ob.id === 'adiant' && !(emp.folha && emp.folha.adiantamento)) return { tipo:'na' };
     if ((ob.id === 'fgts' || ob.id === 'fgts13') && ehProlabore(emp)) return { tipo:'dispensada', motivo:'prolabore' };
-    if (ob.id !== 'fgts13' && (emp.dispensadas || []).indexOf(ob.id) !== -1) return { tipo:'dispensada' };
+    if (ob.id !== 'fgts13'){ var per = inativaEm(emp, ob.id); if (per) return { tipo:'dispensada', motivo:'desativada', periodo:per }; }
     var venc = ob.venc(COMP_ANO, COMP_MES, emp);
     var feito = entregue(emp.codigo, ob.id);
     return { tipo:'ativa', venc:venc, feito:feito, st:statusPrazo(venc, feito) };
@@ -1586,6 +1701,7 @@
   var secoes = {
     painel:        { titulo:'Painel', descricao:'Fechamento da competência em tempo real' },
     escritorios:   { titulo:'Escritórios', descricao:'Escritórios contábeis atendidos e o controle de cada carteira' },
+    obrigemp:      { titulo:'Obrigações por empresa', descricao:'Aponte quais obrigações cada empresa tem e desative as que deixaram de existir' },
     clientes:      { titulo:'Clientes', descricao:'Empresas atendidas, organizadas por escritório contábil' },
     equipe:        { titulo:'Equipe', descricao:'Profissionais do DP e suas cores de identificação' },
     tarefas:       { titulo:'Agenda DP', descricao:'Demandas, solicitações e obrigações recorrentes' },
@@ -1705,7 +1821,10 @@
     if (!n){ document.getElementById('corpoEmpresas').innerHTML = '<tr><td colspan="7" class="vazio-lista">Nenhuma empresa cadastrada' + (nomeEscopo() ? ' em ' + esc(nomeEscopo()) : '') + '.</td></tr>'; return; }
     document.getElementById('corpoEmpresas').innerHTML = linhasAgrupadas(lista, 7, function(emp){
       var disp = (ehProlabore(emp) ? '<span class="tag">FGTS Digital (só pró-labore)</span>' : '') +
-        (emp.dispensadas || []).map(function(id){ return '<span class="tag">' + esc(nomeObrig(id)) + '</span>'; }).join('') || '<span class="sem-resp">—</span>';
+        Object.keys(emp.inativas || {}).map(function(id){
+          var aberto = emp.inativas[id].filter(function(x){ return !x.ate; })[0];
+          return aberto ? '<span class="tag' + (aberto.de === '0000-00' ? '' : ' off') + '" title="' + esc(nomeObrig(id)) + ': ' + textoInativa(aberto) + '">' + esc(nomeObrig(id)) + (aberto.de === '0000-00' ? '' : ' · desde ' + textoComp(aberto.de)) + '</span>' : '';
+        }).join('') || '<span class="sem-resp">—</span>';
       return '<tr' + attrLinha(emp) + '><td><span class="codigo">' + esc(emp.codigo) + '</span></td>' +
         '<td class="razao">' + esc(emp.razao) + '</td><td class="mono">' + esc(emp.cnpj) + '</td>' +
         '<td>' + chipResp(emp.responsavel) + '</td><td style="white-space:nowrap">' + textoInicio(emp) + (iniciouEm(emp) ? '' : '<span class="txt-sec">ainda não iniciada</span>') + '</td><td>' + disp + '</td>' +
@@ -1791,7 +1910,7 @@
       e.codigo = cod; e.razao = razao; e.cnpj = cnpj; e.responsavel = resp; e.escritorio = escSel; e.inicio = iniSel;
       aviso('Empresa atualizada');
     } else {
-      dados.empresas.push({ codigo:cod, razao:razao, cnpj:cnpj, responsavel:resp, escritorio:escSel, inicio:iniSel, dispensadas:[], folha:folhaPadrao() });
+      dados.empresas.push({ codigo:cod, razao:razao, cnpj:cnpj, responsavel:resp, escritorio:escSel, inicio:iniSel, inativas:{}, folha:folhaPadrao() });
       aviso('Empresa ' + cod + ' cadastrada');
     }
     salvar(); fecharModal('modalEmpresa'); renderTudo();
@@ -1907,7 +2026,7 @@
   }
 
   var filtroObrig = { sit:'todas', ob:'todas', resp:'todos', busca:'' };
-  var ROT_SIT = { todas:'Todas', pendentes:'Pendentes', atrasadas:'Atrasadas', vencendo:'Vencem em até 2 dias', entregues:'Entregues', semenvio:'Entregues sem envio', dispensadas:'Dispensadas' };
+  var ROT_SIT = { todas:'Todas', pendentes:'Pendentes', atrasadas:'Atrasadas', vencendo:'Vencem em até 2 dias', entregues:'Entregues', semenvio:'Entregues sem envio', dispensadas:'Desativadas' };
   function casaSituacao(sit, s, emp, obId){
     switch (sit){
       case 'pendentes':   return s.tipo === 'ativa' && !s.feito;
@@ -1997,12 +2116,12 @@
           var motivoNa = ob.id === 'adiant' ? 'Empresa sem adiantamento salarial' : 'Sem pagamento da 1ª parcela nesta competência';
           linha += '<td class="cel' + esm + '"><span class="nao-aplica" title="' + motivoNa + '">—</span></td>';
         } else if (s.tipo === 'dispensada'){
-          linha += '<td class="cel dispensada' + esm + '"><span class="st dispensada">' + IC_DISPENSAR + 'Dispensada</span>' +
-            (s.motivo === 'prolabore' ? '<div class="cel-motivo">Só pró-labore</div>' : '<button class="link-mini" data-acao="reativar"' + ref + '>Reativar</button>') + '</td>';
+          linha += '<td class="cel dispensada' + esm + '"><span class="st dispensada">' + IC_DISPENSAR + 'Não tem</span>' +
+            (s.motivo === 'prolabore' ? '<div class="cel-motivo">Só pró-labore</div>' : '<div class="cel-motivo">' + textoInativa(s.periodo) + '</div><button class="link-mini" data-acao="reativar"' + ref + '>Reativar</button>') + '</td>';
         } else {
           linha += '<td class="cel' + esm + '"><div class="cel-topo">' +
             '<button class="chk' + (s.feito ? ' entregue' : '') + '" data-acao="marcar"' + ref + ' aria-pressed="' + s.feito + '" title="' + esc(ob.nome) + ': ' + (s.feito ? 'Entregue' : 'Pendente') + '">' + IC_OK + '</button>' +
-            (ob.id !== 'fgts13' ? '<button class="btn-icone btn-disp perigo" data-acao="dispensar"' + ref + ' title="Dispensar: a empresa não tem esta obrigação">' + IC_DISPENSAR + '</button>' : '') +
+            (ob.id !== 'fgts13' ? '<button class="btn-icone btn-disp perigo" data-acao="dispensar"' + ref + ' title="Desativar: a empresa não tem (ou deixou de ter) esta obrigação">' + IC_DISPENSAR + '</button>' : '') +
             '</div><div class="cel-venc">Vence ' + dataCurta(s.venc) + '</div>' + pilula(s.st) + (s.feito ? htmlEnvio(emp, ob.id, ref) : '') + '</td>';
         }
       });
@@ -2037,6 +2156,99 @@
       '<div class="faixa-lote"><svg viewBox="0 0 24 24"><path d="M2 12.5l4.5 4.5L15 8.5"/><path d="M10 15.5l1.5 1.5L21 7.5"/></svg><div><b>' + ultimoLote.itens.length + ' obrigação(ões) marcada(s) como entregue(s)</b> em lote' + (ultimoLote.envios ? ' · ' + ultimoLote.envios + ' envio(s) validado(s)' : '') + '.</div>' +
       '<button class="btn btn-secundario" id="btnDesfazerLote">Desfazer</button></div>' : '';
   }
+
+  /* =========================================================
+     OBRIGAÇÕES POR EMPRESA — matriz empresa × obrigação
+     ========================================================= */
+  var vigencia = null, vigCompRef = null, colAtual = null;
+  function situacaoConfig(emp, ob, chave){
+    if (ob.id === 'adiant' && !(emp.folha && emp.folha.adiantamento)) return { fixo:'Sem adiantamento', dica:'Defina o adiantamento em Folha de Pagamento' };
+    if (ob.id === 'fgts' && ehProlabore(emp)) return { fixo:'Só pró-labore', dica:'Empresa só com pró-labore não recolhe FGTS' };
+    var per = inativaEm(emp, ob.id, chave);
+    return { ativa:!per, periodo:per, futura:per ? null : desativacaoFutura(emp, ob.id, chave) };
+  }
+  function renderVigencia(){
+    if (!vigencia || vigCompRef !== COMP_CHAVE){ vigencia = COMP_CHAVE; vigCompRef = COMP_CHAVE; }
+    var p = vigencia.split('-'), anos = [];
+    for (var a = ANO + 2; a >= 2015; a--) anos.push(a);
+    document.getElementById('vigMes').innerHTML = MESES.map(function(m, i){ return '<option value="' + dois(i + 1) + '">' + m + '</option>'; }).join('');
+    document.getElementById('vigAno').innerHTML = anos.map(function(a){ return '<option value="' + a + '">' + a + '</option>'; }).join('');
+    document.getElementById('vigMes').value = p[1]; document.getElementById('vigAno').value = p[0];
+  }
+  function renderMatriz(){
+    renderVigencia();
+    var cols = OBRIGACOES, emps = empresasEscopo(), bloq = fechadasDesde(vigencia);
+    document.getElementById('tabMatriz').classList.toggle('travada-m', bloq.length > 0);
+    document.getElementById('vigAviso').innerHTML = bloq.length
+      ? '<div class="fech-alerta vig-aviso"><b>Competência ' + textoComp(bloq[0]) + ' fechada.</b> Para mudar as obrigações, escolha uma competência em aberto (posterior a ' + textoComp(bloq[bloq.length - 1]) + ') ou reabra a competência fechada.</div>' : '';
+    document.getElementById('cabMatriz').innerHTML = '<tr><th>Empresa</th>' + cols.map(function(ob){
+      var tem = 0, apl = 0;
+      emps.forEach(function(e){ var c = situacaoConfig(e, ob, vigencia); if (!c.fixo){ apl++; if (c.ativa) tem++; } });
+      return '<th class="obcol"><button data-col="' + ob.id + '" title="Apontar quais empresas têm ' + esc(ob.nome) + '">' + esc(ob.nome) + '</button><small>' + tem + ' de ' + apl + ' têm</small></th>';
+    }).join('') + '<th class="num">Total</th></tr>';
+    if (!emps.length){ document.getElementById('corpoMatriz').innerHTML = '<tr><td colspan="' + (cols.length + 2) + '" class="vazio-lista">Nenhuma empresa ' + (nomeEscopo() ? 'em ' + esc(nomeEscopo()) : 'cadastrada') + '.</td></tr>'; return; }
+    document.getElementById('corpoMatriz').innerHTML = linhasAgrupadas(emps, cols.length + 2, function(emp){
+      var tem = 0, apl = 0;
+      var cel = cols.map(function(ob){
+        var c = situacaoConfig(emp, ob, vigencia);
+        if (c.fixo) return '<td class="mcel"><span class="m-fixo" title="' + esc(c.dica) + '">' + c.fixo + '</span></td>';
+        apl++; if (c.ativa) tem++;
+        return '<td class="mcel' + (c.ativa ? '' : ' off') + '"><button class="sw' + (c.ativa ? ' on' : '') + '" data-emp="' + esc(emp.codigo) + '" data-ob="' + ob.id + '" title="' + esc(ob.nome) + ': ' + (c.ativa ? 'tem — clique para desativar' : 'não tem — clique para ativar') + '" aria-pressed="' + c.ativa + '"></button>' +
+          '<span class="m-sub' + (c.ativa && !c.futura ? '' : ' off') + '">' + (c.ativa ? (c.futura ? 'Tem · sai em ' + textoComp(c.futura.de) : 'Tem') : textoInativa(c.periodo).replace(/^n/, 'N').replace(/^d/, 'D')) + '</span></td>';
+      }).join('');
+      var ini = !iniciouEm(emp, vigencia) ? '<small style="color:var(--terracota)">início em ' + textoInicio(emp) + '</small>' : '';
+      return '<tr' + attrLinha(emp) + '>' + celulaEmpresa(emp).replace('</small></td>', '</small>' + ini + '</td>') + cel + '<td class="num"><b>' + tem + '</b> de ' + apl + '</td></tr>';
+    });
+  }
+  function aplicarConfig(emp, obId, ligar){
+    return ligar ? ativarObrig(emp, obId, vigencia) : desativarObrig(emp, obId, vigencia);
+  }
+  ['vigMes','vigAno'].forEach(function(id){
+    document.getElementById(id).addEventListener('change', function(){ vigencia = document.getElementById('vigAno').value + '-' + document.getElementById('vigMes').value; renderMatriz(); });
+  });
+  document.getElementById('corpoMatriz').addEventListener('click', function(e){
+    var b = e.target.closest('.sw'); if (!b) return;
+    if (fechadasDesde(vigencia).length){ aviso('Há competência fechada a partir de ' + textoComp(vigencia) + ' — escolha outra competência'); return; }
+    var emp = empresa(b.getAttribute('data-emp')), obId = b.getAttribute('data-ob'), ligar = !b.classList.contains('on');
+    aplicarConfig(emp, obId, ligar);
+    salvar(); renderTudo();
+    aviso(nomeObrig(obId) + (ligar ? ' ativada' : ' desativada') + ' para ' + emp.codigo + ' a partir de ' + textoComp(vigencia));
+  });
+  document.getElementById('cabMatriz').addEventListener('click', function(e){
+    var b = e.target.closest('[data-col]'); if (!b) return;
+    colAtual = b.getAttribute('data-col');
+    var ob = OBRIGACOES.filter(function(o){ return o.id === colAtual; })[0];
+    document.getElementById('colTitulo').textContent = 'Quem tem: ' + ob.nome;
+    document.getElementById('colSub').textContent = 'Vale a partir da competência ' + textoComp(vigencia) + (nomeEscopo() ? ' · ' + nomeEscopo() : '');
+    var html = '';
+    gruposEscritorio(empresasEscopo()).forEach(function(g){
+      if (dados.escritorios.length) html += '<div class="grp">' + esc(g.esc ? g.esc.nome : 'Sem escritório') + '</div>';
+      g.emps.forEach(function(emp){
+        var c = situacaoConfig(emp, ob, vigencia);
+        html += c.fixo
+          ? '<label class="fixo"><input type="checkbox" disabled><span><b>' + esc(emp.codigo) + '</b> ' + esc(emp.razao) + '</span><small>' + c.fixo + '</small></label>'
+          : '<label><input type="checkbox" data-emp="' + esc(emp.codigo) + '"' + (c.ativa ? ' checked' : '') + '><span><b>' + esc(emp.codigo) + '</b> ' + esc(emp.razao) + '</span><small>' + (c.ativa ? (c.futura ? 'sai em ' + textoComp(c.futura.de) : '') : textoInativa(c.periodo)) + '</small></label>';
+      });
+    });
+    document.getElementById('colLista').innerHTML = html || '<div class="vazio-lista">Nenhuma empresa.</div>';
+    var bloq = fechadasDesde(vigencia).length > 0;
+    document.getElementById('colSalvar').disabled = bloq;
+    document.getElementById('colSub').textContent += bloq ? ' — competência fechada: escolha outra para alterar' : '';
+    abrirModal('modalColuna', null);
+  });
+  function marcarColuna(v){ document.querySelectorAll('#colLista input[data-emp]').forEach(function(i){ i.checked = v; }); }
+  document.getElementById('colTodas').addEventListener('click', function(){ marcarColuna(true); });
+  document.getElementById('colNenhuma').addEventListener('click', function(){ marcarColuna(false); });
+  document.getElementById('colSalvar').addEventListener('click', function(){
+    var on = 0, off = 0;
+    document.querySelectorAll('#colLista input[data-emp]').forEach(function(i){
+      var emp = empresa(i.getAttribute('data-emp'));
+      if (aplicarConfig(emp, colAtual, i.checked)) { if (i.checked) on++; else off++; }
+    });
+    salvar(); fecharModal('modalColuna'); renderTudo();
+    aviso(nomeObrig(colAtual) + ': ' + (on || off ? (on ? on + ' ativada(s)' : '') + (on && off ? ', ' : '') + (off ? off + ' desativada(s)' : '') + ' a partir de ' + textoComp(vigencia) : 'nenhuma mudança'));
+  });
+  document.getElementById('btnConfigObrig').addEventListener('click', function(){ abrirSecao('obrigemp'); });
 
   /* ---------- Entrega geral (marcar todas de uma vez) ---------- */
   var ultimoLote = null;
@@ -2135,16 +2347,14 @@
         aviso('Envio validado' + ((emp.folha.entrega || []).length ? ' via ' + emp.folha.entrega.join(', ') : ''));
       }
     } else if (acao === 'dispensar'){
-      confirmar({ titulo:'Dispensar obrigação', texto:'Dispensar "' + nomeObrig(obId) + '" para ' + emp.razao + '?\n\nA obrigação deixa de ser cobrada desta empresa a partir de agora e sai do cálculo de progresso. Você pode reativar quando quiser.',
-        ok:'Dispensar', acao:function(){
-          if (!emp.dispensadas) emp.dispensadas = [];
-          if (emp.dispensadas.indexOf(obId) === -1) emp.dispensadas.push(obId);
-          salvar(); renderTudo(); aviso(nomeObrig(obId) + ' dispensada para ' + cod);
-        } });
+      var nc = MESES[COMP_MES] + '/' + COMP_ANO;
+      confirmar({ titulo:'Desativar obrigação', ok:'Desativar',
+        texto:'Desativar "' + nomeObrig(obId) + '" para ' + emp.razao + ' a partir da competência ' + nc + '?\n\nAs competências anteriores não mudam. Para apontar de uma vez quais empresas têm cada obrigação, use Cadastros → Obrigações por empresa.',
+        acao:function(){ desativarObrig(emp, obId, COMP_CHAVE); salvar(); renderTudo(); aviso(nomeObrig(obId) + ' desativada para ' + cod + ' a partir de ' + nc); } });
       return;
     } else if (acao === 'reativar'){
-      emp.dispensadas = (emp.dispensadas || []).filter(function(x){ return x !== obId; });
-      aviso(nomeObrig(obId) + ' reativada para ' + cod);
+      ativarObrig(emp, obId, COMP_CHAVE);
+      aviso(nomeObrig(obId) + ' reativada para ' + cod + ' a partir de ' + MESES[COMP_MES] + '/' + COMP_ANO);
     }
     salvar(); renderTudo();
   });
@@ -3443,7 +3653,7 @@
     }
     plano.novas.forEach(function(it){
       var f = folhaPadrao(); aplicarFolha(f, it.campos);
-      dados.empresas.push({ codigo:it.cod, razao:it.razao, cnpj:it.cnpj, responsavel:idResp(it.respRef) || '', escritorio:idEsc(it.escRef) || '', inicio:it.inicio || padraoInicio(), dispensadas:[], folha:f });
+      dados.empresas.push({ codigo:it.cod, razao:it.razao, cnpj:it.cnpj, responsavel:idResp(it.respRef) || '', escritorio:idEsc(it.escRef) || '', inicio:it.inicio || padraoInicio(), inativas:{}, folha:f });
     });
     plano.atualizadas.forEach(function(it){
       var e = empresa(it.cod);
@@ -3549,7 +3759,7 @@
      INICIALIZAÇÃO
      ========================================================= */
   function renderTudo(){
-    renderEscopo(); renderCompetencia(); renderEscritorios(); renderPainel(); renderEmpresas(); renderEquipe(); renderObrigacoes(); renderDecimo(); renderAgenda(); renderSolicitacoes(); renderFolha(); renderConfig(); renderRelatorios();
+    renderEscopo(); renderCompetencia(); renderEscritorios(); renderPainel(); renderEmpresas(); renderEquipe(); renderObrigacoes(); renderDecimo(); renderAgenda(); renderSolicitacoes(); renderFolha(); renderConfig(); renderRelatorios(); renderMatriz();
   }
 
   var th = HOJE.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long' });
