@@ -450,6 +450,13 @@
   #compEstado{display:inline}
   .seletor-comp .cad{display:none;width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;vertical-align:-1px;margin-right:3px}
   .seletor-comp.fechada .cad{display:inline-block}
+  .btn-lote{background:var(--verde);color:#fff;border-color:var(--verde)}
+  .btn-lote:hover{background:#25683F}
+  .btn-lote[disabled]{background:var(--bege);border-color:var(--bege);color:var(--cinza);cursor:not-allowed}
+  .faixa-lote{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 20px 0;padding:10px 14px;border-radius:8px;background:var(--teal-claro);color:var(--teal-escuro);font-size:13px}
+  .faixa-lote svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .faixa-lote .btn{margin-left:auto}
+  .conf-texto .campo-check{margin-top:12px;white-space:normal}
   .faixa-fechada{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 20px 0;padding:12px 14px;border-radius:8px;background:var(--verde-claro);color:#1F5C39;font-size:13px;border:1px solid #BFDCC9}
   .faixa-fechada svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
   .faixa-fechada .btn{margin-left:auto}
@@ -817,8 +824,10 @@
         <div class="cartao">
           <div class="cartao-cab">
             <div><h3 id="tituloFechamento">Fechamento da competência</h3><span class="sub">Marque o quadrado quando entregar · use <b>⊘</b> para dispensar uma obrigação que a empresa não tem</span></div>
+            <div class="acoes"><button class="btn btn-lote" id="btnEntregarTodas" title="Marca como entregues, de uma vez, as obrigações pendentes que estão na tela (respeita os filtros)"><svg viewBox="0 0 24 24"><path d="M2 12.5l4.5 4.5L15 8.5"/><path d="M10 15.5l1.5 1.5L21 7.5"/></svg><span id="btnEntregarTxt">Marcar todas como entregues</span></button></div>
           </div>
           <div id="faixaFechada"></div>
+          <div id="faixaLote"></div>
           <div class="filtros-sit filtros" id="filtrosSit"></div>
           <div class="barra-filtros">
             <select id="fObrig" title="Filtrar por obrigação"></select>
@@ -1970,6 +1979,7 @@
         : 'Nenhuma empresa ' + (nomeEscopo() ? 'em ' + esc(nomeEscopo()) : 'cadastrada') + '. Cadastre em Clientes.';
       document.getElementById('corpoObrigacoes').innerHTML = '<tr><td colspan="' + (visiveis.length+2) + '" class="vazio-lista">' + msgVazio + '</td></tr>';
       document.getElementById('fResumo').textContent = naoIniciadas ? naoIniciadas + (naoIniciadas === 1 ? ' empresa com início posterior' : ' empresas com início posterior') : '';
+      atualizarLote(fch);
       return;
     }
 
@@ -2014,7 +2024,84 @@
       '<span style="margin-left:auto">Responsáveis:</span>' +
       dados.equipe.map(function(m){ return '<span><i class="ponto" style="background:' + m.cor + ';border-radius:50%"></i>' + esc(m.nome) + '</span>'; }).join('');
     document.getElementById('legendaObrig').innerHTML = leg;
+
+    atualizarLote(fch);
   }
+  // Entrega geral: botão e faixa de desfazer
+  function atualizarLote(fch){
+    var lote = itensDoLote(), bt = document.getElementById('btnEntregarTodas'), filtrado = filtroAtivoObrig();
+    bt.disabled = !!fch || !lote.pendentes.length;
+    document.getElementById('btnEntregarTxt').textContent = fch ? 'Competência fechada' :
+      (lote.pendentes.length ? (filtrado ? 'Marcar filtradas como entregues (' : 'Marcar todas como entregues (') + lote.pendentes.length + ')' : 'Nada pendente para marcar');
+    document.getElementById('faixaLote').innerHTML = (ultimoLote && ultimoLote.comp === COMP_CHAVE && !fch) ?
+      '<div class="faixa-lote"><svg viewBox="0 0 24 24"><path d="M2 12.5l4.5 4.5L15 8.5"/><path d="M10 15.5l1.5 1.5L21 7.5"/></svg><div><b>' + ultimoLote.itens.length + ' obrigação(ões) marcada(s) como entregue(s)</b> em lote' + (ultimoLote.envios ? ' · ' + ultimoLote.envios + ' envio(s) validado(s)' : '') + '.</div>' +
+      '<button class="btn btn-secundario" id="btnDesfazerLote">Desfazer</button></div>' : '';
+  }
+
+  /* ---------- Entrega geral (marcar todas de uma vez) ---------- */
+  var ultimoLote = null;
+  function filtroAtivoObrig(){ return filtroObrig.sit !== 'todas' || filtroObrig.ob !== 'todas' || filtroObrig.resp !== 'todos' || !!filtroObrig.busca || escritorioAtivo !== 'todos'; }
+  // Obrigações pendentes (e entregues sem envio) dentro do que está na tela
+  function itensDoLote(){
+    var cols = colunasDoMes(empresasEscopo());
+    var visiveis = filtroObrig.ob === 'todas' ? cols : cols.filter(function(c){ return c.id === filtroObrig.ob; });
+    var r = { pendentes:[], semEnvio:[], empresas:{} };
+    empresasDaComp().filter(empresaPassaFiltro).forEach(function(emp){
+      visiveis.forEach(function(ob){
+        var st = situacao(emp, ob);
+        if (st.tipo !== 'ativa' || !casaSituacao(filtroObrig.sit, st, emp, ob.id)) return;
+        if (!st.feito){ r.pendentes.push({ emp:emp, ob:ob }); r.empresas[emp.codigo] = 1; }
+        else if (!envioDe(emp.codigo, ob.id)) r.semEnvio.push({ emp:emp, ob:ob });
+      });
+    });
+    return r;
+  }
+  document.getElementById('btnEntregarTodas').addEventListener('click', function(){
+    if (fechamentoDe(COMP_CHAVE)){ aviso('Competência fechada — reabra-a para alterar'); return; }
+    var lote = itensDoLote(), n = lote.pendentes.length, ne = Object.keys(lote.empresas).length;
+    if (!n){ aviso('Não há obrigações pendentes na tela'); return; }
+    var porOb = {};
+    lote.pendentes.forEach(function(i){ porOb[i.ob.nome] = (porOb[i.ob.nome] || 0) + 1; });
+    var escopo = [];
+    if (escritorioAtivo !== 'todos') escopo.push('escritório: ' + nomeEscopo());
+    if (filtroObrig.resp !== 'todos'){ var mr = membro(filtroObrig.resp); escopo.push('responsável: ' + (mr ? mr.nome : 'sem responsável')); }
+    if (filtroObrig.ob !== 'todas') escopo.push('obrigação: ' + nomeObrig(filtroObrig.ob));
+    if (filtroObrig.sit !== 'todas') escopo.push('situação: ' + ROT_SIT[filtroObrig.sit].toLowerCase());
+    if (filtroObrig.busca) escopo.push('busca: "' + filtroObrig.busca + '"');
+    var totalEnvio = n + lote.semEnvio.length;
+    confirmar({ titulo:'Entrega geral — ' + MESES[COMP_MES] + '/' + COMP_ANO, ok:'Marcar ' + n + ' como entregues',
+      html:'Marcar como <b>entregues</b> ' + n + ' obrigação(ões) pendente(s) de ' + ne + ' empresa(s)' + (escopo.length ? ' — filtro aplicado (' + esc(escopo.join(' · ')) + ')' : ', considerando todas as empresas da competência') + ':' +
+        '<div class="imp-lista" style="margin-top:8px">' + Object.keys(porOb).map(function(k){ return '<div>' + esc(k) + ' <b>· ' + porOb[k] + '</b></div>'; }).join('') + '</div>' +
+        '<label class="campo-check"><input type="checkbox" id="loteEnvio"><div><b>Validar também o envio ao cliente</b><span>' + totalEnvio + ' envio(s), pelo modo de entrega de cada empresa' + (lote.semEnvio.length ? ' (inclui ' + lote.semEnvio.length + ' já entregue(s) sem envio)' : '') + '.</span></div></label>' +
+        '<div class="dica-txt" style="margin-top:10px">A data de hoje e o responsável de cada empresa ficam registrados. Dá para desfazer logo em seguida.</div>',
+      acao:function(){
+        var comEnvio = !!(document.getElementById('loteEnvio') || {}).checked;
+        var s = statusMes(), hoje = isoData(HOJE), reg = { comp:COMP_CHAVE, itens:[], envios:0, enviosAntes:[] };
+        lote.pendentes.forEach(function(i){
+          var c = i.emp.codigo; if (!s[c]) s[c] = {};
+          s[c][i.ob.id] = { em:hoje, por:i.emp.responsavel || '' };
+          reg.itens.push({ cod:c, ob:i.ob.id });
+        });
+        if (comEnvio){
+          lote.pendentes.concat(lote.semEnvio).forEach(function(i){
+            reg.enviosAntes.push({ cod:i.emp.codigo, ob:i.ob.id, antes:envioDe(i.emp.codigo, i.ob.id) });
+            definirEnvio(i.emp.codigo, i.ob.id, { data:hoje, modos:((i.emp.folha && i.emp.folha.entrega) || []).slice() });
+            reg.envios++;
+          });
+        }
+        ultimoLote = reg;
+        salvar(); renderTudo();
+        aviso(n + ' obrigação(ões) marcada(s) como entregue(s)' + (comEnvio ? ' e envio validado' : ''));
+      } });
+  });
+  document.getElementById('faixaLote').addEventListener('click', function(e){
+    if (!e.target.closest('#btnDesfazerLote') || !ultimoLote) return;
+    var reg = ultimoLote, s = dados.obrigacoes[reg.comp] || {};
+    reg.itens.forEach(function(i){ if (s[i.cod]) delete s[i.cod][i.ob]; });
+    reg.enviosAntes.forEach(function(x){ definirEnvio(x.cod, x.ob, x.antes); }); // a faixa só aparece na própria competência do lote
+    ultimoLote = null;
+    salvar(); renderTudo(); aviso('Entrega geral desfeita');
+  });
 
   document.getElementById('filtrosSit').addEventListener('click', function(e){
     var b = e.target.closest('[data-sit]'); if (!b) return;
@@ -3429,7 +3516,7 @@
   var confAcao = null;
   function confirmar(o){
     document.getElementById('confTitulo').textContent = o.titulo;
-    document.getElementById('confTexto').textContent = o.texto;
+    if (o.html) document.getElementById('confTexto').innerHTML = o.html; else document.getElementById('confTexto').textContent = o.texto;
     var ok = document.getElementById('confOk');
     ok.textContent = o.ok || 'Confirmar';
     ok.className = 'btn ' + (o.perigo ? 'btn-perigo-cheio' : 'btn-primario');
