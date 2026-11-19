@@ -63,15 +63,15 @@
   }
   .menu-marca h1{font-size:17px;font-weight:600;line-height:1.2}
   .menu-marca span{font-size:11.5px;opacity:.7;display:block;font-weight:400}
-  .menu-nav{flex:1;overflow-y:auto;padding:14px 10px}
+  .menu-nav{flex:1;overflow-y:auto;padding:8px 10px}
   .menu-grupo{
     font-size:10.5px;text-transform:uppercase;letter-spacing:1px;
-    opacity:.55;padding:14px 12px 6px;font-weight:600;
+    opacity:.55;padding:11px 12px 4px;font-weight:600;
   }
   .menu-item{
     width:100%;background:none;border:none;color:inherit;
     display:flex;align-items:center;gap:12px;
-    padding:10px 12px;border-radius:8px;
+    padding:8px 12px;border-radius:8px;
     font-size:14px;text-align:left;line-height:1.3;opacity:.85;
     transition:background .15s,opacity .15s;
   }
@@ -204,6 +204,9 @@
   .st.ambar{background:var(--ambar-claro);color:var(--ambar-texto)}
   .st.neutro{background:var(--cinza-claro);color:var(--cinza);border:1px solid var(--bege)}
   .st.dispensada{background:var(--bege);color:var(--cinza)}
+  .tag-sis{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;background:var(--cinza-claro);border:1px solid var(--borda);color:var(--preto);padding:1px 8px;border-radius:10px;white-space:nowrap}
+  .tag-sis svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .tag-sis.sem{color:var(--cinza);font-weight:400;font-style:italic}
   .tag.off{background:var(--terracota-claro);color:var(--terracota)}
   td.cel.dispensada{background:repeating-linear-gradient(45deg,#FAF9F5,#FAF9F5 6px,#F2F0E8 6px,#F2F0E8 12px)}
   .link-mini{background:none;border:none;color:var(--teal);font-size:11.5px;font-weight:600;text-decoration:underline;margin-top:4px;display:block;margin-left:auto;margin-right:auto}
@@ -608,6 +611,9 @@
   .menu-escopo select{width:100%;padding:9px 30px 9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.28);color:#fff;font-weight:600;font-size:13.5px;cursor:pointer;-webkit-appearance:none;appearance:none;outline:none;
     background:rgba(255,255,255,.1) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>") no-repeat right 11px center}
   .menu-escopo select:focus{border-color:#fff}
+  .menu-escopo .duplo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .menu-escopo .duplo label{margin-bottom:4px}
+  .menu-escopo .duplo select{padding:8px 24px 8px 9px;font-size:12.5px;background-position:right 7px center}
   .menu-escopo select option,.menu-escopo select optgroup{color:var(--preto);background:#fff}
   .menu-escopo select.filtrado{background-color:var(--terracota);border-color:var(--terracota)}
   .escopo-chip{display:none;margin-left:10px;vertical-align:middle;font-size:12px;font-weight:600;background:var(--terracota-claro);color:var(--terracota);padding:2px 10px;border-radius:10px}
@@ -675,6 +681,10 @@
     <div class="menu-escopo">
       <label for="selEscritorio">Escritório contábil</label>
       <select id="selEscritorio" title="Mostrar a carteira de um escritório em todas as telas"></select>
+      <div class="duplo">
+        <div><label for="selSistema">Sistema</label><select id="selSistema" title="Filtrar as empresas pelo sistema de folha"></select></div>
+        <div><label for="selTipoFolha">Folha</label><select id="selTipoFolha" title="Filtrar empresas com empregados ou só pró-labore"></select></div>
+      </div>
     </div>
 
     <nav class="menu-nav" id="menuNav">
@@ -1015,6 +1025,14 @@
       </section>
       <!-- CONFIGURAÇÕES: IMPORTAÇÃO E BACKUP -->
       <section class="secao" id="secao-configuracoes">
+        <div class="cartao" style="margin-bottom:16px">
+          <div class="cartao-cab"><div><h3>Sistemas de folha</h3><span class="sub">Sistemas usados para processar a folha das empresas — aparecem no cadastro e no filtro "Sistema" do menu lateral</span></div></div>
+          <div class="modos" id="listaSistemas"></div>
+          <div class="add-modo">
+            <input type="text" id="novoSistema" placeholder="Ex.: nome do sistema de folha" maxlength="40">
+            <button class="btn btn-secundario" id="btnAddSistema"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Adicionar sistema</button>
+          </div>
+        </div>
         <div class="config-grade">
           <div class="cartao">
             <div class="cartao-cab"><div><h3>Importar empresas por planilha</h3><span class="sub">Cadastre ou atualize várias empresas de uma vez</span></div></div>
@@ -1058,6 +1076,11 @@
       <div class="campo"><label for="empRazao">Razão Social</label><input type="text" id="empRazao" placeholder="Ex.: Comércio Exemplo Ltda"></div>
       <div class="campo"><label for="empCnpj">CNPJ</label><input type="text" id="empCnpj" placeholder="00.000.000/0000-00" maxlength="18" inputmode="numeric"></div>
       <div class="campo"><label for="empResp">Responsável</label><select id="empResp"></select></div>
+      <div class="campo"><label for="empSistema">Sistema da folha</label>
+        <select id="empSistema"></select>
+        <input type="text" id="empSistemaNovo" placeholder="Nome do novo sistema" maxlength="40" style="display:none;margin-top:8px">
+        <div class="dica">Em qual sistema a folha desta empresa é processada.</div>
+      </div>
       <div class="campo"><label>Folha da empresa</label>
         <div class="opcoes" id="empTipo">
           <label class="opcao"><input type="radio" name="empTipo" value="empregados">Com empregados</label>
@@ -1540,6 +1563,17 @@
     dados.versao = 7;
     salvar();
   }
+  // v8: sistema de folha de cada empresa
+  if (dados.versao < 8){
+    if (!dados.sistemas) dados.sistemas = ['Domínio', 'Questor', 'Alterdata'];
+    var exSis = { 'EMP001|Padaria Pão Dourado Ltda':'Domínio', 'EMP002|Auto Center Rodovia Sul Ltda':'Domínio', 'EMP003|Clínica Odontológica Sorriso Pleno Ltda':'Questor',
+                  'EMP004|Construtora Alicerce Mineiro Ltda':'Alterdata', 'EMP005|Mercado Bom Preço Varginha Ltda':'Alterdata', 'EMP006|Traço Livre Arquitetura e Design Ltda':'Domínio' };
+    dados.empresas.forEach(function(e){ if (e.sistema === undefined) e.sistema = exSis[e.codigo + '|' + e.razao] || ''; });
+    dados.versao = 8;
+    salvar();
+  }
+  if (!dados.sistemas) dados.sistemas = [];
+  dados.empresas.forEach(function(e){ if (e.sistema === undefined) e.sistema = ''; });
   dados.empresas.forEach(function(e){ if (!e.inativas) e.inativas = {}; });
   }
   function empresaPorCodigo(cod){ for (var i=0;i<dados.empresas.length;i++) if (dados.empresas[i].codigo === cod) return dados.empresas[i]; return null; }
@@ -1584,13 +1618,24 @@
   var CHAVE_ESC = 'gestaoDP_escritorioAtivo';
   var escritorioAtivo = 'todos';
   try { escritorioAtivo = window.localStorage.getItem(CHAVE_ESC) || 'todos'; } catch(e) {}
+  // Filtros globais adicionais: sistema da folha e tipo de folha
+  var CHAVE_FILTROS = 'gestaoDP_filtrosCarteira';
+  var filtroSistema = 'todos', filtroTipo = 'todos';
+  try { var fcS = JSON.parse(window.localStorage.getItem(CHAVE_FILTROS) || '{}'); filtroSistema = fcS.sistema || 'todos'; filtroTipo = fcS.tipo || 'todos'; } catch(e) {}
+  function escopoAtivo(){ return escritorioAtivo !== 'todos' || filtroSistema !== 'todos' || filtroTipo !== 'todos'; }
+  function salvarFiltrosCarteira(){ try { window.localStorage.setItem(CHAVE_FILTROS, JSON.stringify({ sistema:filtroSistema, tipo:filtroTipo })); } catch(e) {} }
+  function sistemaValido(nome){ return dados.sistemas.some(function(x){ return x === nome; }); }
   function escritorio(id){ for (var i=0;i<dados.escritorios.length;i++) if (dados.escritorios[i].id === id) return dados.escritorios[i]; return null; }
   function escDe(emp){ return emp ? escritorio(emp.escritorio) : null; }
   function emEscopo(emp){
-    if (escritorioAtivo === 'todos') return true;
+    if (!escopoAtivo()) return true;
     if (!emp) return false;
-    if (escritorioAtivo === 'sem') return !escDe(emp);
-    return emp.escritorio === escritorioAtivo;
+    if (escritorioAtivo === 'sem' && escDe(emp)) return false;
+    if (escritorioAtivo !== 'todos' && escritorioAtivo !== 'sem' && emp.escritorio !== escritorioAtivo) return false;
+    if (filtroSistema === 'sem' && sistemaValido(emp.sistema)) return false;
+    if (filtroSistema !== 'todos' && filtroSistema !== 'sem' && emp.sistema !== filtroSistema) return false;
+    if (filtroTipo !== 'todos' && (ehProlabore(emp) ? 'prolabore' : 'empregados') !== filtroTipo) return false;
+    return true;
   }
   /* ---------- Obrigações por empresa (períodos de inatividade) ---------- */
   function textoComp(chave){
@@ -1653,11 +1698,16 @@
 
   function empresasEscopo(){ return dados.empresas.filter(emEscopo); }
   function empresasDaComp(){ return empresasEscopo().filter(function(e){ return iniciouEm(e); }); }
-  function solEmEscopo(x){ return escritorioAtivo === 'todos' || emEscopo(empresa(x.empresa)); }
+  function solEmEscopo(x){ return !escopoAtivo() || emEscopo(empresa(x.empresa)); }
   function nomeEscopo(){
-    if (escritorioAtivo === 'todos') return '';
-    if (escritorioAtivo === 'sem') return 'Sem escritório';
-    var e = escritorio(escritorioAtivo); return e ? e.nome : '';
+    var partes = [];
+    if (escritorioAtivo === 'sem') partes.push('Sem escritório');
+    else if (escritorioAtivo !== 'todos'){ var e = escritorio(escritorioAtivo); if (e) partes.push(e.nome); }
+    if (filtroSistema === 'sem') partes.push('Sem sistema definido');
+    else if (filtroSistema !== 'todos') partes.push(filtroSistema);
+    if (filtroTipo === 'empregados') partes.push('Com empregados');
+    else if (filtroTipo === 'prolabore') partes.push('Só pró-labore');
+    return partes.join(' · ');
   }
   function gruposEscritorio(lista){
     var gs = dados.escritorios.map(function(e){ return { esc:e, emps:[] }; }), sem = { esc:null, emps:[] };
@@ -1703,15 +1753,38 @@
       (semEsc && dados.escritorios.length ? '<option value="sem">Sem escritório (' + semEsc + ')</option>' : '');
     sel.value = escritorioAtivo;
     sel.classList.toggle('filtrado', escritorioAtivo !== 'todos');
+
+    if (filtroSistema !== 'todos' && filtroSistema !== 'sem' && !sistemaValido(filtroSistema)) filtroSistema = 'todos';
+    var semSis = dados.empresas.filter(function(e){ return !sistemaValido(e.sistema); }).length;
+    var ss = document.getElementById('selSistema');
+    ss.innerHTML = '<option value="todos">Todos</option>' + dados.sistemas.map(function(n){
+      var q = dados.empresas.filter(function(x){ return x.sistema === n; }).length;
+      return '<option value="' + esc(n) + '">' + esc(n) + ' (' + q + ')</option>';
+    }).join('') + (semSis ? '<option value="sem">Sem sistema (' + semSis + ')</option>' : '');
+    ss.value = filtroSistema;
+    ss.classList.toggle('filtrado', filtroSistema !== 'todos');
+
+    var nPro = dados.empresas.filter(ehProlabore).length;
+    var st = document.getElementById('selTipoFolha');
+    st.innerHTML = '<option value="todos">Todas</option><option value="empregados">Com empregados (' + (dados.empresas.length - nPro) + ')</option><option value="prolabore">Só pró-labore (' + nPro + ')</option>';
+    st.value = filtroTipo;
+    st.classList.toggle('filtrado', filtroTipo !== 'todos');
+
     var chip = document.getElementById('escopoChip');
     chip.textContent = nomeEscopo();
-    chip.classList.toggle('visivel', escritorioAtivo !== 'todos');
+    chip.classList.toggle('visivel', escopoAtivo());
+  }
+  function tagSistema(emp){
+    return sistemaValido(emp.sistema)
+      ? '<span class="tag-sis" title="Sistema da folha"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>' + esc(emp.sistema) + '</span>'
+      : '<span class="tag-sis sem" title="Sistema da folha não definido">sem sistema</span>';
   }
   function celulaEmpresa(emp){
     var m = membro(emp.responsavel);
     return '<td class="celula-empresa"><span class="codigo">' + esc(emp.codigo) + '</span>' +
       '<span class="razao">' + esc(emp.razao) + '</span>' +
-      '<small>' + (m ? '<span class="resp-chip" style="font-size:12px"><i style="background:' + m.cor + '"></i>' + esc(m.nome) + '</span>' : '<span class="sem-resp">Sem responsável</span>') + '</small></td>';
+      '<small>' + (m ? '<span class="resp-chip" style="font-size:12px"><i style="background:' + m.cor + '"></i>' + esc(m.nome) + '</span>' : '<span class="sem-resp">Sem responsável</span>') + '</small>' +
+      '<small style="margin-top:4px">' + tagSistema(emp) + '</small></td>';
   }
   var IC_EDITAR = '<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
   var IC_EXCLUIR = '<svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>';
@@ -1882,7 +1955,7 @@
   function renderEmpresas(){
     var lista = empresasEscopo(), n = lista.length;
     document.getElementById('totalEmpresas').textContent = n + (n === 1 ? ' empresa cadastrada' : ' empresas cadastradas') + (nomeEscopo() ? ' · ' + nomeEscopo() : (dados.escritorios.length ? ' · ' + dados.escritorios.length + ' escritórios' : ''));
-    if (!n){ document.getElementById('corpoEmpresas').innerHTML = '<tr><td colspan="7" class="vazio-lista">Nenhuma empresa cadastrada' + (nomeEscopo() ? ' em ' + esc(nomeEscopo()) : '') + '.</td></tr>'; return; }
+    if (!n){ document.getElementById('corpoEmpresas').innerHTML = '<tr><td colspan="7" class="vazio-lista">' + (nomeEscopo() ? 'Nenhuma empresa no filtro ' + esc(nomeEscopo()) : 'Nenhuma empresa cadastrada') + '.</td></tr>'; return; }
     document.getElementById('corpoEmpresas').innerHTML = linhasAgrupadas(lista, 7, function(emp){
       var disp = (ehProlabore(emp) ? '<span class="tag">FGTS Digital (só pró-labore)</span>' : '') +
         Object.keys(emp.inativas || {}).map(function(id){
@@ -1890,7 +1963,7 @@
           return aberto ? '<span class="tag' + (aberto.de === '0000-00' ? '' : ' off') + '" title="' + esc(nomeObrig(id)) + ': ' + textoInativa(aberto) + '">' + esc(nomeObrig(id)) + (aberto.de === '0000-00' ? '' : ' · desde ' + textoComp(aberto.de)) + '</span>' : '';
         }).join('') || '<span class="sem-resp">—</span>';
       return '<tr' + attrLinha(emp) + '><td><span class="codigo">' + esc(emp.codigo) + '</span></td>' +
-        '<td class="razao">' + esc(emp.razao) + '<span style="display:block;margin-top:4px">' + (ehProlabore(emp) ? '<span class="badge-folha prolabore">Só pró-labore</span>' : '<span class="badge-folha empregados">Com empregados</span>') + '</span></td><td class="mono">' + esc(emp.cnpj) + '</td>' +
+        '<td class="razao">' + esc(emp.razao) + '<span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px">' + (ehProlabore(emp) ? '<span class="badge-folha prolabore">Só pró-labore</span>' : '<span class="badge-folha empregados">Com empregados</span>') + tagSistema(emp) + '</span></td><td class="mono">' + esc(emp.cnpj) + '</td>' +
         '<td>' + chipResp(emp.responsavel) + '</td><td style="white-space:nowrap">' + textoInicio(emp) + (iniciouEm(emp) ? '' : '<span class="txt-sec">ainda não iniciada</span>') + '</td><td>' + disp + '</td>' +
         '<td class="acoes-col"><button class="btn-icone" data-acao="editar" data-cod="' + esc(emp.codigo) + '" title="Editar">' + IC_EDITAR + '</button>' +
         '<button class="btn-icone perigo" data-acao="excluir" data-cod="' + esc(emp.codigo) + '" title="Excluir">' + IC_EXCLUIR + '</button></td></tr>';
@@ -1940,7 +2013,12 @@
     var pIni = (e && e.inicio ? e.inicio : padraoInicio()).split('-');
     document.getElementById('empIniMes').value = pIni[1];
     document.getElementById('empIniAno').value = pIni[0];
-    var tipoAtual = e && e.folha && e.folha.tipo === 'prolabore' ? 'prolabore' : 'empregados';
+    var sisAtual = e ? (sistemaValido(e.sistema) ? e.sistema : '') : (filtroSistema !== 'todos' && filtroSistema !== 'sem' ? filtroSistema : (dados.sistemas.length === 1 ? dados.sistemas[0] : ''));
+    document.getElementById('empSistema').innerHTML = '<option value="">— Não definido —</option>' + dados.sistemas.map(function(n){ return '<option value="' + esc(n) + '">' + esc(n) + '</option>'; }).join('') + '<option value="__novo">+ Cadastrar novo sistema…</option>';
+    document.getElementById('empSistema').value = sisAtual;
+    document.getElementById('empSistemaNovo').value = '';
+    document.getElementById('empSistemaNovo').style.display = 'none';
+    var tipoAtual = e ? (e.folha && e.folha.tipo === 'prolabore' ? 'prolabore' : 'empregados') : (filtroTipo === 'prolabore' ? 'prolabore' : 'empregados');
     document.querySelectorAll('input[name=empTipo]').forEach(function(r){ r.checked = r.value === tipoAtual; });
     marcarOpcoes('empTipo');
     document.getElementById('empEscritorio').value = e ? (escDe(e) ? e.escritorio : '') :
@@ -1949,6 +2027,11 @@
     abrirModal('modalEmpresa', 'empRazao');
   }
   document.getElementById('empTipo').addEventListener('change', function(){ marcarOpcoes('empTipo'); });
+  document.getElementById('empSistema').addEventListener('change', function(){
+    var novo = this.value === '__novo', inp = document.getElementById('empSistemaNovo');
+    inp.style.display = novo ? 'block' : 'none';
+    if (novo) inp.focus();
+  });
   document.getElementById('empCnpj').addEventListener('input', function(){ this.value = mascaraCnpj(this.value); });
   document.getElementById('btnNovaEmpresa').addEventListener('click', function(){ abrirModalEmpresa(null); });
   document.getElementById('empSalvar').addEventListener('click', function(){
@@ -1973,6 +2056,14 @@
     var escSel = document.getElementById('empEscritorio').value;
     var iniSel = document.getElementById('empIniAno').value + '-' + document.getElementById('empIniMes').value;
     var tipoSel = (document.querySelector('input[name=empTipo]:checked') || {}).value || 'empregados';
+    var sisSel = document.getElementById('empSistema').value;
+    if (sisSel === '__novo'){
+      sisSel = document.getElementById('empSistemaNovo').value.trim();
+      if (sisSel){
+        var exist = dados.sistemas.filter(function(x){ return normalizar(x) === normalizar(sisSel); })[0];
+        if (exist) sisSel = exist; else dados.sistemas.push(sisSel);
+      }
+    }
     if (empEditando){
       var e = empresa(empEditando);
       if (cod !== empEditando) renomearCodigo(empEditando, cod);
@@ -1980,9 +2071,10 @@
       if (!e.folha) e.folha = folhaPadrao();
       var tipoAntes = e.folha.tipo || 'empregados';
       e.folha.tipo = tipoSel;
+      e.sistema = sisSel;
       aviso(tipoSel !== tipoAntes ? (tipoSel === 'prolabore' ? 'Empresa atualizada — só pró-labore: FGTS Digital dispensado' : 'Empresa atualizada — com empregados: FGTS Digital voltou a ser cobrado') : 'Empresa atualizada');
     } else {
-      dados.empresas.push({ codigo:cod, razao:razao, cnpj:cnpj, responsavel:resp, escritorio:escSel, inicio:iniSel, inativas:{}, folha:(function(){ var f = folhaPadrao(); f.tipo = tipoSel; return f; })() });
+      dados.empresas.push({ codigo:cod, razao:razao, cnpj:cnpj, responsavel:resp, escritorio:escSel, inicio:iniSel, inativas:{}, folha:(function(){ var f = folhaPadrao(); f.tipo = tipoSel; return f; })(), sistema:sisSel });
       aviso('Empresa ' + cod + ' cadastrada' + (tipoSel === 'prolabore' ? ' (só pró-labore)' : ''));
     }
     salvar(); fecharModal('modalEmpresa'); renderTudo();
@@ -2176,7 +2268,7 @@
     if (!totalEscopo){
       var msgVazio = naoIniciadas
         ? 'Nenhuma empresa com responsabilidades iniciadas na competência ' + MESES[COMP_MES] + '/' + COMP_ANO + '. Veja o início de cada empresa em Clientes.'
-        : 'Nenhuma empresa ' + (nomeEscopo() ? 'em ' + esc(nomeEscopo()) : 'cadastrada') + '. Cadastre em Clientes.';
+        : (nomeEscopo() ? 'Nenhuma empresa no filtro ' + esc(nomeEscopo()) + '.' : 'Nenhuma empresa cadastrada. Cadastre em Clientes.');
       document.getElementById('corpoObrigacoes').innerHTML = '<tr><td colspan="' + (visiveis.length+2) + '" class="vazio-lista">' + msgVazio + '</td></tr>';
       document.getElementById('fResumo').textContent = naoIniciadas ? naoIniciadas + (naoIniciadas === 1 ? ' empresa com início posterior' : ' empresas com início posterior') : '';
       atualizarLote(fch);
@@ -2270,7 +2362,7 @@
       emps.forEach(function(e){ var c = situacaoConfig(e, ob, vigencia); if (!c.fixo){ apl++; if (c.ativa) tem++; } });
       return '<th class="obcol"><button data-col="' + ob.id + '" title="Apontar quais empresas têm ' + esc(ob.nome) + '">' + esc(ob.nome) + '</button><small>' + tem + ' de ' + apl + ' têm</small></th>';
     }).join('') + '<th class="num">Total</th></tr>';
-    if (!emps.length){ document.getElementById('corpoMatriz').innerHTML = '<tr><td colspan="' + (cols.length + 2) + '" class="vazio-lista">' + (termoM ? 'Nenhuma empresa encontrada para "' + esc(termoM) + '".' : 'Nenhuma empresa ' + (nomeEscopo() ? 'em ' + esc(nomeEscopo()) : 'cadastrada') + '.') + '</td></tr>'; return; }
+    if (!emps.length){ document.getElementById('corpoMatriz').innerHTML = '<tr><td colspan="' + (cols.length + 2) + '" class="vazio-lista">' + (termoM ? 'Nenhuma empresa encontrada para "' + esc(termoM) + '".' : 'Nenhuma empresa ' + (nomeEscopo() ? 'no filtro ' + esc(nomeEscopo()) : 'cadastrada') + '.') + '</td></tr>'; return; }
     document.getElementById('corpoMatriz').innerHTML = linhasAgrupadas(emps, cols.length + 2, function(emp){
       var tem = 0, apl = 0;
       var cel = cols.map(function(ob){
@@ -2378,7 +2470,7 @@
 
   /* ---------- Entrega geral (marcar todas de uma vez) ---------- */
   var ultimoLote = null;
-  function filtroAtivoObrig(){ return filtroObrig.sit !== 'todas' || filtroObrig.ob !== 'todas' || filtroObrig.resp !== 'todos' || !!filtroObrig.busca || escritorioAtivo !== 'todos'; }
+  function filtroAtivoObrig(){ return filtroObrig.sit !== 'todas' || filtroObrig.ob !== 'todas' || filtroObrig.resp !== 'todos' || !!filtroObrig.busca || escopoAtivo(); }
   // Obrigações pendentes (e entregues sem envio) dentro do que está na tela
   function itensDoLote(){
     var cols = colunasDoMes(empresasEscopo());
@@ -2401,7 +2493,7 @@
     var porOb = {};
     lote.pendentes.forEach(function(i){ porOb[i.ob.nome] = (porOb[i.ob.nome] || 0) + 1; });
     var escopo = [];
-    if (escritorioAtivo !== 'todos') escopo.push('escritório: ' + nomeEscopo());
+    if (escopoAtivo()) escopo.push('carteira: ' + nomeEscopo());
     if (filtroObrig.resp !== 'todos'){ var mr = membro(filtroObrig.resp); escopo.push('responsável: ' + (mr ? mr.nome : 'sem responsável')); }
     if (filtroObrig.ob !== 'todas') escopo.push('obrigação: ' + nomeObrig(filtroObrig.ob));
     if (filtroObrig.sit !== 'todas') escopo.push('situação: ' + ROT_SIT[filtroObrig.sit].toLowerCase());
@@ -2517,7 +2609,7 @@
       '<th class="centro">2ª Parcela<br><small style="text-transform:none;letter-spacing:0;font-weight:400">prazo ' + dataCompleta(v2) + '</small></th>' +
       '<th>FGTS Digital 13º</th></tr>';
 
-    if (!empresasEscopo().length){ document.getElementById('corpoDecimo').innerHTML = '<tr><td colspan="4" class="vazio-lista">Nenhuma empresa ' + (nomeEscopo() ? 'em ' + esc(nomeEscopo()) : 'cadastrada') + '.</td></tr>'; return; }
+    if (!empresasEscopo().length){ document.getElementById('corpoDecimo').innerHTML = '<tr><td colspan="4" class="vazio-lista">Nenhuma empresa ' + (nomeEscopo() ? 'no filtro ' + esc(nomeEscopo()) : 'cadastrada') + '.</td></tr>'; return; }
 
     var termoDec = document.getElementById('buscaDecimo').value;
     var baseDec = empresasEscopo().filter(function(e){ return iniciouEm(e, COMP_ANO + '-12'); });
@@ -2597,7 +2689,7 @@
     var lista = [];
     var d = deIso(iso), ultimo = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
     dados.agenda.forEach(function(dem){
-      if (dem.empresa && escritorioAtivo !== 'todos'){ var eD = empresa(dem.empresa); if (eD && !emEscopo(eD)) return; }
+      if (dem.empresa && escopoAtivo()){ var eD = empresa(dem.empresa); if (eD && !emEscopo(eD)) return; }
       if (!dem.recorrente){
         if (dem.data === iso) lista.push({ dem:dem, iso:iso, concluida:!!dem.concluida });
       } else if (iso >= dem.data){
@@ -2941,7 +3033,7 @@
      ========================================================= */
   var parCodigo = null;
   function renderFolha(){
-    if (!empresasEscopo().length){ document.getElementById('corpoFolha').innerHTML = '<tr><td colspan="8" class="vazio-lista">Nenhuma empresa ' + (nomeEscopo() ? 'em ' + esc(nomeEscopo()) : 'cadastrada') + '.</td></tr>'; }
+    if (!empresasEscopo().length){ document.getElementById('corpoFolha').innerHTML = '<tr><td colspan="8" class="vazio-lista">Nenhuma empresa ' + (nomeEscopo() ? 'no filtro ' + esc(nomeEscopo()) : 'cadastrada') + '.</td></tr>'; }
     else document.getElementById('corpoFolha').innerHTML = linhasAgrupadas(empresasEscopo(), 8, function(emp){
       var f = emp.folha || folhaPadrao();
       var db = '<span class="sem-resp">—</span>';
@@ -3117,7 +3209,15 @@
   document.getElementById('selEscritorio').addEventListener('change', function(){
     definirEscopo(this.value);
     renderTudo();
-    aviso(escritorioAtivo === 'todos' ? 'Mostrando todos os escritórios' : 'Mostrando a carteira: ' + nomeEscopo());
+    aviso(!escopoAtivo() ? 'Mostrando todas as empresas' : 'Mostrando: ' + nomeEscopo());
+  });
+  document.getElementById('selSistema').addEventListener('change', function(){
+    filtroSistema = this.value; salvarFiltrosCarteira(); renderTudo();
+    aviso(!escopoAtivo() ? 'Mostrando todas as empresas' : 'Mostrando: ' + nomeEscopo());
+  });
+  document.getElementById('selTipoFolha').addEventListener('change', function(){
+    filtroTipo = this.value; salvarFiltrosCarteira(); renderTudo();
+    aviso(!escopoAtivo() ? 'Mostrando todas as empresas' : 'Mostrando: ' + nomeEscopo());
   });
 
   /* =========================================================
@@ -3464,7 +3564,38 @@
     renderConfig();
     aviso('Backup exportado com ' + dados.empresas.length + ' empresas');
   }
+  function renderSistemas(){
+    var uso = {};
+    dados.empresas.forEach(function(e){ if (e.sistema) uso[e.sistema] = (uso[e.sistema] || 0) + 1; });
+    document.getElementById('listaSistemas').innerHTML = dados.sistemas.length ? dados.sistemas.map(function(n, i){
+      return '<span class="modo-chip">' + esc(n) + ' <small>' + (uso[n] || 0) + ((uso[n] || 0) === 1 ? ' empresa' : ' empresas') + '</small>' +
+        '<button data-si="' + i + '" title="Remover sistema"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></span>';
+    }).join('') : '<span class="sem-resp">Nenhum sistema cadastrado.</span>';
+  }
+  function adicionarSistema(){
+    var inp = document.getElementById('novoSistema'), v = inp.value.trim();
+    if (!v) return;
+    if (dados.sistemas.some(function(x){ return normalizar(x) === normalizar(v); })){ aviso('Esse sistema já existe'); return; }
+    dados.sistemas.push(v); inp.value = '';
+    salvar(); renderTudo(); aviso('Sistema "' + v + '" adicionado');
+  }
+  document.getElementById('btnAddSistema').addEventListener('click', adicionarSistema);
+  document.getElementById('novoSistema').addEventListener('keydown', function(e){ if (e.key === 'Enter') adicionarSistema(); });
+  document.getElementById('listaSistemas').addEventListener('click', function(e){
+    var b = e.target.closest('[data-si]'); if (!b) return;
+    var nome = dados.sistemas[+b.getAttribute('data-si')];
+    var n = dados.empresas.filter(function(x){ return x.sistema === nome; }).length;
+    confirmar({ titulo:'Remover sistema', ok:'Remover', perigo:true,
+      texto:'Remover o sistema "' + nome + '"?' + (n ? '\n\n' + n + (n === 1 ? ' empresa ficará' : ' empresas ficarão') + ' sem sistema definido.' : ''),
+      acao:function(){
+        dados.sistemas = dados.sistemas.filter(function(x){ return x !== nome; });
+        dados.empresas.forEach(function(x){ if (x.sistema === nome) x.sistema = ''; });
+        if (filtroSistema === nome){ filtroSistema = 'todos'; salvarFiltrosCarteira(); }
+        salvar(); renderTudo(); aviso('Sistema removido');
+      } });
+  });
   function renderConfig(){
+    renderSistemas();
     var u = dados.ultimoBackup ? new Date(dados.ultimoBackup) : null;
     document.getElementById('infoBackup').innerHTML = 'O backup inclui empresas, equipe, obrigações de todas as competências, 13º, agenda, solicitações e particularidades da folha.<br><b>Último backup exportado:</b> ' +
       (u ? dataCompleta(u) + ' às ' + dois(u.getHours()) + ':' + dois(u.getMinutes()) : 'nenhum ainda');
@@ -3579,6 +3710,7 @@
     inicio:['iniciodasresponsabilidades','iniciomesano','inicio','iniciodoatendimento','competenciainicial','iniciodasresponsabilidadesmesano'],
     rpa:['rpasimnao','rpa','temrpa'], rpaObs:['observacaodorpa','observacaorpa','obsrpa'], entrega:['mododeentrega','modosdeentrega','entrega'],
     escritorio:['escritorio','escritoriocontabil','contabilidade','nomedoescritorio'],
+    sistema:['sistemadafolha','sistemadefolha','sistema','sistemadp'],
     mesesSind:['mesesdacontribuicaosindical','contribuicaosindicalmeses','mesesdacontribuicao','contribuicaosindical','mesessindical']
   };
   var COLUNAS_ESC = {
@@ -3700,7 +3832,7 @@
 
   var planoImport = null;
   function planejarImportacao(entrada){
-    var linhas = entrada.linhas, plano = { novas:[], atualizadas:[], novosResp:[], novosEsc:[], escAtualizados:[], avisos:[], erros:[] };
+    var linhas = entrada.linhas, plano = { novas:[], atualizadas:[], novosResp:[], novosEsc:[], escAtualizados:[], novosSis:[], avisos:[], erros:[] };
     var usados = {}, novosResp = {}, maxCod = 0, escMapa = {};
     dados.escritorios.forEach(function(e){ escMapa[normalizar(e.nome)] = { id:e.id, nome:e.nome }; });
     (entrada.escritorios || []).forEach(function(l){
@@ -3747,6 +3879,14 @@
       if (l.tipo) c.tipo = normalizar(l.tipo).indexOf('pro') !== -1 ? 'prolabore' : 'empregados';
       if (l.rpa) c.rpa = simNao(l.rpa);
       if (l.rpaObs) c.rpaObs = l.rpaObs;
+      if (l.sistema){
+        var sisI = dados.sistemas.filter(function(x){ return normalizar(x) === normalizar(l.sistema); })[0];
+        if (!sisI){
+          sisI = (plano.novosSis.filter(function(x){ return normalizar(x) === normalizar(l.sistema); })[0]) || l.sistema;
+          if (plano.novosSis.indexOf(sisI) === -1) plano.novosSis.push(sisI);
+        }
+        item0.sistema = sisI;
+      }
       if (l.mesesSind){ var msI = mesesDeTexto(l.mesesSind); if (msI === undefined) plano.avisos.push(ident + ': meses da contribuição sindical "' + l.mesesSind + '" não reconhecidos — use "Todo mês" ou os meses, ex.: mar, abr'); else item0.mesesSind = msI; }
       if (l.inicio){ var ini = inicioDe(l.inicio); if (ini === null) plano.avisos.push(ident + ': início "' + l.inicio + '" não reconhecido — use mês/ano, ex.: 10/2026'); else item0.inicio = ini; }
       if (l.entrega) c.entrega = l.entrega.split(/[,;\/]+/).map(function(x){ return x.trim(); }).filter(Boolean);
@@ -3761,13 +3901,14 @@
         }
         escRef = escMapa[ke];
       } else if (!existente && (dados.escritorios.length || plano.novosEsc.length)) plano.avisos.push(ident + ': sem escritório informado — ficará como "Sem escritório"');
-      var item = { linha:n, cod:cod, razao:razao, cnpj:cnpj, respRef:respRef, respNome:l.responsavel || '', escRef:escRef, escNome:escRef ? escRef.nome : '', inicio:item0.inicio, mesesSind:item0.mesesSind, campos:c };
+      var item = { linha:n, cod:cod, razao:razao, cnpj:cnpj, respRef:respRef, respNome:l.responsavel || '', escRef:escRef, escNome:escRef ? escRef.nome : '', inicio:item0.inicio, mesesSind:item0.mesesSind, sistema:item0.sistema, campos:c };
       (existente ? plano.atualizadas : plano.novas).push(item);
     });
     plano.novosResp = Object.keys(novosResp).map(function(k){ return novosResp[k]; });
     return plano;
   }
   function aplicarImportacao(plano){
+    (plano.novosSis || []).forEach(function(n){ if (!sistemaValido(n)) dados.sistemas.push(n); });
     var idsEsc = {};
     plano.novosEsc.forEach(function(x){
       var id = gerarId('e'), c = x.campos;
@@ -3801,7 +3942,7 @@
     }
     plano.novas.forEach(function(it){
       var f = folhaPadrao(); aplicarFolha(f, it.campos);
-      dados.empresas.push({ codigo:it.cod, razao:it.razao, cnpj:it.cnpj, responsavel:idResp(it.respRef) || '', escritorio:idEsc(it.escRef) || '', inicio:it.inicio || padraoInicio(), inativas:{}, folha:f });
+      dados.empresas.push({ codigo:it.cod, razao:it.razao, cnpj:it.cnpj, responsavel:idResp(it.respRef) || '', escritorio:idEsc(it.escRef) || '', inicio:it.inicio || padraoInicio(), inativas:{}, folha:f, sistema:it.sistema || '' });
       if (it.mesesSind !== undefined && it.mesesSind !== null) dados.empresas[dados.empresas.length - 1].sindMeses = [{ de:'0000-00', meses:it.mesesSind }];
     });
     plano.atualizadas.forEach(function(it){
@@ -3810,6 +3951,7 @@
       var r = idResp(it.respRef); if (r !== undefined) e.responsavel = r;
       var es = idEsc(it.escRef); if (es !== undefined) e.escritorio = es;
       if (it.inicio) e.inicio = it.inicio;
+      if (it.sistema) e.sistema = it.sistema;
       if (it.mesesSind !== undefined){ var cpI = competenciaAtualPadrao(); definirMesesSindical(e, it.mesesSind, cpI.a + '-' + dois(cpI.m + 1)); }
       if (!e.folha) e.folha = folhaPadrao();
       aplicarFolha(e.folha, it.campos);
@@ -3824,7 +3966,7 @@
     var lista = function(titulo, itens, cls){
       return itens.length ? '<div><div class="imp-titulo">' + titulo + '</div><div class="imp-lista ' + (cls || '') + '">' + itens.map(function(t){ return '<div>' + t + '</div>'; }).join('') + '</div></div>' : '';
     };
-    var desc = function(it){ return '<b>' + esc(it.cod) + '</b> — ' + esc(it.razao) + (it.inicio ? ' · início ' + textoInicio({ inicio:it.inicio }) : '') + (it.escNome ? ' · <span style="color:var(--teal)">' + esc(it.escNome) + '</span>' : '') + (it.respNome ? ' · ' + esc(it.respNome) : ''); };
+    var desc = function(it){ return '<b>' + esc(it.cod) + '</b> — ' + esc(it.razao) + (it.inicio ? ' · início ' + textoInicio({ inicio:it.inicio }) : '') + (it.sistema ? ' · ' + esc(it.sistema) : '') + (it.escNome ? ' · <span style="color:var(--teal)">' + esc(it.escNome) + '</span>' : '') + (it.respNome ? ' · ' + esc(it.respNome) : ''); };
     var descEsc = function(x){ var c = x.campos; return '<b>' + esc(c.nome || x.nome) + '</b>' + [c.contato, c.telefone, c.email].filter(Boolean).map(function(v){ return ' · ' + esc(v); }).join(''); };
     document.getElementById('importResumo').innerHTML =
       '<div class="imp-stats"><div class="imp-stat"><b>' + plano.novosEsc.length + '</b><span>escritórios novos</span></div>' +
@@ -3833,6 +3975,7 @@
       '<div class="imp-stat"><b>' + plano.novosResp.length + '</b><span>novos profissionais</span></div></div>' +
       lista('Escritórios novos', plano.novosEsc.map(descEsc)) +
       lista('Escritórios atualizados', plano.escAtualizados.map(descEsc)) +
+      lista('Sistemas de folha novos (serão cadastrados)', plano.novosSis.map(esc)) +
       lista('Empresas novas', plano.novas.map(desc)) +
       lista('Empresas atualizadas', plano.atualizadas.map(desc)) +
       lista('Profissionais que serão cadastrados na Equipe', plano.novosResp.map(function(r){ return esc(r.nome) + (r.funcao ? ' — ' + esc(r.funcao) : ''); })) +
